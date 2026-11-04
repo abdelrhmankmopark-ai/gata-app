@@ -98,8 +98,18 @@ async function loadConversations(){
   var peerId=(members.data||[]).map(function(m){return m.user_id;}).find(function(id){return id!==user.id;});
   var peer=null;if(peerId){var pr=await db.from('profiles').select('username,display_name,last_seen,avatar_url').eq('id',peerId).maybeSingle();peer=pr.data;}
   var name=c.title||(peer?(peer.display_name||peer.username):'محادثة');
+  var unreadCount=0;
+  try{
+   var incoming=await db.from('messages').select('id').eq('conversation_id',c.id).neq('sender_id',user.id);
+   if(!incoming.error&&incoming.data&&incoming.data.length){
+    var messageIds=incoming.data.map(function(m){return m.id;});
+    var readRows=await db.from('message_reads').select('message_id').eq('reader_id',user.id).in('message_id',messageIds);
+    if(!readRows.error){var readSet=new Set((readRows.data||[]).map(function(x){return x.message_id;}));unreadCount=messageIds.filter(function(id){return !readSet.has(id);}).length;}
+   }
+  }catch(err){}
+  if(currentConversation===c.id)unreadCount=0;
   var b=document.createElement('button');b.className='conversation-item'+(currentConversation===c.id?' active':'');
-  b.innerHTML=avatarHTML(peer&&peer.avatar_url,name)+'<div class="conversation-info"><strong>'+safe(name)+'</strong><span>@'+safe(peer?peer.username:'')+'</span></div>';
+  b.innerHTML=avatarHTML(peer&&peer.avatar_url,name)+'<div class="conversation-info"><strong>'+safe(name)+'</strong><span>@'+safe(peer?peer.username:'')+'</span></div>'+(unreadCount?'<span class="unread-badge" aria-label="'+unreadCount+' رسائل غير مقروءة">'+(unreadCount>99?'99+':unreadCount)+'</span>':'');
   b.addEventListener('click',(function(id,p,n){return function(){openConversation(id,p,n);};})(c.id,peerId,name));box.appendChild(b);
  }
 }
