@@ -4,3 +4,5 @@
 @media(max-width:760px){.app-shell{padding:10px}.auth-view{margin-top:5vh}.workspace{grid-template-columns:1fr;min-height:0}.sidebar{min-height:170px;max-height:220px;overflow:auto}.conversation{min-height:55vh}.welcome-panel{min-height:55vh}.active-chat{min-height:55vh}.messages{max-height:calc(55vh - 145px)}.chat-view{min-height:calc(100vh - 20px)}.topbar{height:66px}.conversation-list{grid-template-columns:1fr 1fr}.conversation-item{padding:8px}.conversation-info span{max-width:120px}.brand-name{font-size:24px}.auth-card{padding:19px}}
 
 .message-delete{border:0;background:transparent;color:#ffd0d5;font-size:10px;padding:0 3px;text-decoration:underline;cursor:pointer}.message-delete:hover{color:#fff}
+
+.unread-badge{min-width:21px;height:21px;padding:0 6px;border-radius:20px;background:var(--accent);color:#07151b;font-size:11px;font-weight:800;display:grid;place-items:center}
