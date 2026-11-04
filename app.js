@@ -393,9 +393,9 @@ async function saveProfileName(){
  if(!name){toast('اكتب اسم عرض صحيح');input.focus();return;}
  if(name.length>32){toast('اسم العرض طويل جدًا');return;}
  if(bio.length>160){toast('النبذة لا تزيد عن 160 حرف');return;}
- if(status.length>80){toast('الحالة لا تزيد عن 80 حرف');return;}
+ if(status.length>80&&String(status).indexOf('GATA_STATUS:')!==0){toast('الحالة لا تزيد عن 80 حرف');return;}
  var btn=$('save-profile-btn');btn.disabled=true;btn.textContent='جاري الحفظ...';
- var now=new Date().toISOString();var r=await db.from('profiles').update({display_name:name,bio:bio||null,status_text:status||null,status_updated_at:status?now:null}).eq('id',user.id);
+ var now=new Date().toISOString();var statusTime=String(status).indexOf('GATA_STATUS:')===0&&profileData?profileData.status_updated_at:(status?now:null);var r=await db.from('profiles').update({display_name:name,bio:bio||null,status_text:status||null,status_updated_at:statusTime}).eq('id',user.id);
  btn.disabled=false;btn.textContent='حفظ التغييرات';
  if(r.error){toast('تعذر حفظ الملف الشخصي: '+r.error.message);return;}
  if(profileData){profileData.display_name=name;profileData.bio=bio||null;if(String(status).indexOf('GATA_STATUS:')!==0){profileData.status_text=status||null;profileData.status_updated_at=status?now:null;}}$('settings-display-name').textContent=name;
