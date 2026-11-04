@@ -118,11 +118,22 @@ async function loadConversations(){
   }catch(err){}
   if(currentConversation===c.id)unreadCount=0;
   var b=document.createElement('div');b.className='conversation-item'+(currentConversation===c.id?' active':'');b.setAttribute('role','button');b.tabIndex=0;
-  b.innerHTML=avatarHTML(peer&&peer.avatar_url,name)+'<div class="conversation-info"><strong>'+safe(name)+'</strong><span class="conversation-preview">'+safe(preview)+'</span></div><div class="conversation-side">'+(time?'<time class="conversation-time">'+safe(time)+'</time>':'')+(unreadCount?'<span class="unread-badge" aria-label="'+unreadCount+' رسائل غير مقروءة">'+(unreadCount>99?'99+':unreadCount)+'</span>':'')+'</div><button class="delete-chat-btn" type="button" title="حذف الدردشة" aria-label="حذف الدردشة">🗑</button>';
+  b.dataset.search=(name+' '+(peer&&peer.username||'')+' '+preview).toLocaleLowerCase();b.innerHTML=avatarHTML(peer&&peer.avatar_url,name)+'<div class="conversation-info"><strong>'+safe(name)+'</strong><span class="conversation-preview">'+safe(preview)+'</span></div><div class="conversation-side">'+(time?'<time class="conversation-time">'+safe(time)+'</time>':'')+(unreadCount?'<span class="unread-badge" aria-label="'+unreadCount+' رسائل غير مقروءة">'+(unreadCount>99?'99+':unreadCount)+'</span>':'')+'</div><button class="delete-chat-btn" type="button" title="حذف الدردشة" aria-label="حذف الدردشة">🗑</button>';
   b.addEventListener('click',(function(id,p,n){return function(){openConversation(id,p,n);};})(c.id,peerId,name));
   b.addEventListener('keydown',(function(id,p,n){return function(ev){if((ev.key==='Enter'||ev.key===' ')&&ev.target===b){ev.preventDefault();openConversation(id,p,n);}};})(c.id,peerId,name));
   b.querySelector('.delete-chat-btn').addEventListener('click',function(ev){ev.stopPropagation();deleteConversation(c.id,name);});box.appendChild(b);
  }
+ filterConversations();
+}
+async function deleteConversation(cut_this_nonexistent(){
+ }
+}
+function filterConversations(){
+ var input=$('chat-search'),box=$('conversation-list');if(!input||!box)return;
+ var term=input.value.trim().toLocaleLowerCase();var cards=box.querySelectorAll('.conversation-item');var shown=0;
+ cards.forEach(function(card){var hay=(card.dataset.search||card.textContent||'').toLocaleLowerCase();var match=!term||hay.includes(term);card.style.display=match?'':'none';if(match)shown++;});
+ var empty=box.querySelector('.chat-filter-empty');if(empty)empty.remove();
+ if(term&&cards.length&&shown===0){var msg=document.createElement('div');msg.className='empty-state chat-filter-empty';msg.textContent='ملقيناش محادثة بالاسم ده.';box.appendChild(msg);}
 }
 async function deleteConversation(id,name){
  if(!confirm('حذف دردشة '+name+' من قائمة محادثاتك؟ لن تُحذف الرسائل من حساب الطرف الآخر.'))return;
@@ -266,6 +277,7 @@ function initEvents(){
  $('login-form').addEventListener('submit',login);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);
  $('back-to-chats').onclick=function(){if(location.hash==='#chat'&&history.state&&history.state.gataChat){history.back();}else{showChats();}};
  window.addEventListener('popstate',function(){showChats();});
+ $('chat-search').addEventListener('input',filterConversations);
  $('refresh-app-btn').onclick=refreshApp;$('new-chat-btn').onclick=openModal;$('contacts-btn').onclick=openContacts;$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
  $('close-image-preview').onclick=closeImagePreview;$('image-preview').addEventListener('click',function(ev){if(ev.target===$('image-preview'))closeImagePreview();});document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){closeImagePreview();$('modal').classList.add('hidden');$('settings-panel').classList.add('hidden');}});
  $('logout-btn').onclick=logout;$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};$('save-profile-btn').onclick=saveProfileName;
