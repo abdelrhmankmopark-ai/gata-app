@@ -226,6 +226,13 @@ async function startDirectChat(peer){
   if(created.error){toast('تعذر إنشاء المحادثة: '+created.error.message);return;}cid=created.data.id;
   var added=await db.from('conversation_members').insert([{conversation_id:cid,user_id:user.id},{conversation_id:cid,user_id:peer.id}]);
   if(added.error){toast('تم إنشاء المحادثة لكن تعذرت إضافة الطرف الآخر: '+added.error.message);return;}
+ }else{
+  var mine=await db.from('conversation_members').select('user_id').eq('conversation_id',cid).eq('user_id',user.id).maybeSingle();
+  if(mine.error){toast('تعذر التحقق من عضويتك: '+mine.error.message);return;}
+  if(!mine.data){
+   var rejoin=await db.from('conversation_members').insert({conversation_id:cid,user_id:user.id});
+   if(rejoin.error){toast('تعذر إعادة إضافتك للمحادثة: '+rejoin.error.message);return;}
+  }
  }
  $('modal').classList.add('hidden');await openConversation(cid,peer.id,peer.display_name||peer.username);toast('المحادثة جاهزة');
 }
