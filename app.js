@@ -134,7 +134,7 @@ async function saveStatusValue(value){
  var result=await db.from('profiles').update({status_text:value,status_updated_at:now}).eq('id',user.id);
  if(result.error)throw result.error;
  if(profileData){profileData.status_text=value;profileData.status_updated_at=now;}
- await loadFriendStatuses((await db.from('conversation_members').select('conversation_id').eq('user_id',user.id)).data||[].map(function(x){return x.conversation_id;}));
+ await loadConversations();
 }
 async function publishTextStatus(){
  var input=$('quick-status-text'),value=input.value.trim();
@@ -185,7 +185,7 @@ async function deleteMyStatus(){
  var result=await db.from('profiles').update({status_text:null,status_updated_at:null}).eq('id',user.id);
  if(result.error){toast('تعذر حذف الحالة: '+result.error.message);return;}
  if(profileData){profileData.status_text=null;profileData.status_updated_at=null;}
- $('status-viewer').classList.add('hidden');await loadFriendStatuses([]);toast('تم حذف حالتك');
+ $('status-viewer').classList.add('hidden');await loadConversations();toast('تم حذف حالتك');
 }
 
 var statusRecorder=null;
