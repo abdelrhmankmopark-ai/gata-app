@@ -80,7 +80,7 @@ async function ensureProfile(){
 }
 async function enterApp(){
  $('auth-view').classList.add('hidden');$('chat-view').classList.remove('hidden');
- var p=await ensureProfile();$('my-handle').textContent='@'+p.username;$('settings-user').textContent='@'+p.username;$('profile-display-name').value=p.display_name||'';setAvatar($('chat-avatar'),p.avatar_url);
+ var p=await ensureProfile();$('my-handle').textContent='@'+p.username;$('settings-user').textContent='@'+p.username;$('settings-display-name').textContent=p.display_name||p.username;$('profile-display-name').value=p.display_name||'';setAvatar($('chat-avatar'),p.avatar_url);setAvatar($('settings-avatar'),p.avatar_url);
  await db.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',user.id);
  await loadConversations();startHeartbeat();subscribeGlobal();
 }
@@ -254,7 +254,7 @@ async function changeAvatar(file){
  var ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg',path=user.id+'/avatar-'+Date.now()+'.'+ext;toast('جاري تحديث الصورة...');
  var up=await db.storage.from('gata-avatars').upload(path,file,{contentType:file.type,upsert:false});if(up.error){toast('تعذر رفع الصورة: '+up.error.message);return;}
  var url=db.storage.from('gata-avatars').getPublicUrl(path).data.publicUrl,upd=await db.from('profiles').update({avatar_url:url}).eq('id',user.id);if(upd.error){toast('تعذر حفظ الصورة: '+upd.error.message);return;}
- if(profileData)profileData.avatar_url=url;setAvatar($('chat-avatar'),url);toast('تم تحديث الصورة الشخصية');
+ if(profileData)profileData.avatar_url=url;setAvatar($('chat-avatar'),url);setAvatar($('settings-avatar'),url);toast('تم تحديث الصورة الشخصية');
 }
 async function saveProfileName(){
  var input=$('profile-display-name'),name=input.value.trim();
@@ -264,7 +264,7 @@ async function saveProfileName(){
  var r=await db.from('profiles').update({display_name:name}).eq('id',user.id);
  btn.disabled=false;btn.textContent='حفظ التغييرات';
  if(r.error){toast('تعذر حفظ الاسم: '+r.error.message);return;}
- if(profileData)profileData.display_name=name;
+ if(profileData)profileData.display_name=name;$('settings-display-name').textContent=name;
  toast('تم تحديث اسم العرض بنجاح');
  await loadConversations();
 }
@@ -284,7 +284,7 @@ function initEvents(){
  $('chat-search').addEventListener('input',filterConversations);
  $('refresh-app-btn').onclick=refreshApp;$('new-chat-btn').onclick=openModal;$('contacts-btn').onclick=openContacts;$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
  $('close-image-preview').onclick=closeImagePreview;$('image-preview').addEventListener('click',function(ev){if(ev.target===$('image-preview'))closeImagePreview();});document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){closeImagePreview();$('modal').classList.add('hidden');$('settings-panel').classList.add('hidden');}});
- $('logout-btn').onclick=logout;$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};$('save-profile-btn').onclick=saveProfileName;
+ $('logout-btn').onclick=logout;$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');if(profileData){$('settings-display-name').textContent=profileData.display_name||profileData.username;$('settings-user').textContent='@'+profileData.username;$('profile-display-name').value=profileData.display_name||'';setAvatar($('settings-avatar'),profileData.avatar_url);}};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};$('save-profile-btn').onclick=saveProfileName;$('settings-account-row').onclick=function(){$('profile-editor').classList.toggle('hidden');};
  $('language-select').onchange=function(){language=this.value;localStorage.setItem('gata-language',language);applyLanguage();};
  $('attach-image-btn').onclick=function(){openFilePicker($('image-file-input'));};
  $('image-file-input').onchange=function(){if(this.files&&this.files[0])uploadMedia(this.files[0],'image');this.value='';};
