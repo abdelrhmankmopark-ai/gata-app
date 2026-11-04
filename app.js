@@ -171,7 +171,7 @@ function initEvents(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){toast('تسجيل الصوت غير مدعوم في هذا المتصفح');return;}
   try{var stream=await navigator.mediaDevices.getUserMedia({audio:true});recordedChunks=[];mediaRecorder=new MediaRecorder(stream);
    mediaRecorder.ondataavailable=function(e){if(e.data.size)recordedChunks.push(e.data);};
-   mediaRecorder.onstop=function(){var blob=new Blob(recordedChunks,{type:mediaRecorder.mimeType||'audio/webm'});stream.getTracks().forEach(function(t){t.stop();});var ext=(blob.type.split('/')[1]||'webm').split(';')[0];uploadMedia(new File([blob],'voice.'+ext,{type:blob.type}),'audio');};
+   mediaRecorder.onstop=function(){var blob=new Blob(recordedChunks,{type:mediaRecorder.mimeType||'audio/webm'});stream.getTracks().forEach(function(t){t.stop();});var mime=(blob.type.split(';')[0]||'audio/webm'),ext=(mime.split('/')[1]||'webm');uploadMedia(new File([blob],'voice.'+ext,{type:mime}),'audio');};
    mediaRecorder.start();this.textContent='■';this.classList.add('recording');toast('التسجيل شغال… اضغط الزر مرة تانية للإرسال');
   }catch(err){toast('لازم تسمح باستخدام الميكروفون');}
  };
