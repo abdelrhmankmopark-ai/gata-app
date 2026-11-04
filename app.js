@@ -103,7 +103,7 @@ async function loadConversations(){
   var time='';
   if(latest.data){
    var media=isMedia(latest.data.content);
-   preview=media?(media.kind==='image'?'📷 صورة':'🎙 رسالة صوتية'):String(latest.data.content||'');
+   preview=media?'مرفق':String(latest.data.content||'');
    if(latest.data.sender_id===user.id)preview='أنت: '+preview;
    time=dateLabel(latest.data.created_at);
   }
