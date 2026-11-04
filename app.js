@@ -13,6 +13,21 @@ var translations={
 function tr(k){return (translations[language]||translations.ar)[k]||k;}
 function toast(msg){var el=$('toast');el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show');},2800);}
 function note(msg){$('auth-note').textContent=msg||'';}
+function applyTheme(){
+ var light=localStorage.getItem('gata-theme')==='light';
+ document.body.classList.toggle('light',light);
+ var icon=light?'🌙':'☀️';
+ ['theme-toggle','theme-toggle-auth'].forEach(function(id){
+  var b=$(id);if(b){b.textContent=icon;b.setAttribute('aria-label',light?'التبديل للوضع الليلي':'التبديل للوضع النهاري');b.title=light?'الوضع الليلي':'الوضع النهاري';}
+ });
+ var meta=document.querySelector('meta[name="theme-color"]');
+ if(meta)meta.setAttribute('content',light?'#edf4f8':'#0a1020');
+}
+function toggleTheme(){
+ localStorage.setItem('gata-theme',document.body.classList.contains('light')?'dark':'light');
+ applyTheme();
+}
+
 function safe(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function initials(s){var a=String(s||'G').trim().split(/\s+/);return (a[0][0]||'G').toUpperCase();}
 function setAvatar(el,url){if(!el)return;if(url)el.innerHTML='<img class="avatar-image" src="'+safe(url)+'" alt="">';else el.textContent='G';}
@@ -173,6 +188,7 @@ async function refreshApp(){var btn=$('refresh-app-btn');if(btn){btn.disabled=tr
 function openFilePicker(input){if(!input)return;try{if(typeof input.showPicker==='function'){input.showPicker();return;}}catch(e){}input.click();}
 function initEvents(){
  $('show-login').onclick=function(){showAuth('login');};$('show-signup').onclick=function(){showAuth('signup');};
+ $('theme-toggle').onclick=toggleTheme;$('theme-toggle-auth').onclick=toggleTheme;
  $('login-form').addEventListener('submit',login);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);
  $('refresh-app-btn').onclick=refreshApp;$('new-chat-btn').onclick=openModal;$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
  $('logout-btn').onclick=logout;$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};
@@ -191,7 +207,7 @@ function initEvents(){
  $('change-avatar-btn').onclick=function(){openFilePicker($('avatar-file-input'));};
  $('avatar-file-input').onchange=function(){if(this.files&&this.files[0])changeAvatar(this.files[0]);this.value='';};
 }
-async function boot(){initEvents();applyLanguage();var s=await db.auth.getSession();if(s.data.session){user=s.data.session.user;try{await enterApp();}catch(e){showAuth('login');note('تعذر تحميل الحساب: '+e.message);}}else showAuth('login');}
+async function boot(){initEvents();applyTheme();applyLanguage();var s=await db.auth.getSession();if(s.data.session){user=s.data.session.user;try{await enterApp();}catch(e){showAuth('login');note('تعذر تحميل الحساب: '+e.message);}}else showAuth('login');}
 document.addEventListener('DOMContentLoaded',boot);
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}
 })();
