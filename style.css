@@ -441,3 +441,7 @@ body.light .updates-panel .friend-status-avatar{box-shadow:0 7px 18px rgba(62,11
 
 /* GATA v44 — reply to a friend's status */
 .status-reply-btn{align-self:center;min-width:190px;margin:2px auto 8px;padding:11px 20px;border:0;border-radius:999px;background:var(--accent);color:#06251f;font:inherit;font-size:13px;font-weight:850;box-shadow:0 8px 22px #0003}.status-reply-btn:active{transform:scale(.97)}
+
+
+/* GATA v45 — quoted replies inside chats */
+.reply-compose-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 13px;margin:0 10px 7px;border-inline-start:4px solid var(--accent);border-radius:10px;background:var(--panel);color:var(--text)}.reply-compose-bar.hidden{display:none!important}.reply-compose-bar>div{display:grid;gap:3px;min-width:0}.reply-compose-bar strong{font-size:11px;color:var(--accent)}.reply-compose-bar span{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:min(72vw,420px)}.reply-compose-bar button{flex:none;width:30px;height:30px;border:0;border-radius:50%;background:#ffffff12;color:var(--text);font-size:22px}.message-quote{padding:6px 9px;margin-bottom:7px;border-inline-start:3px solid var(--accent);border-radius:7px;background:#00000012;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.message-reply-text{white-space:pre-wrap;overflow-wrap:anywhere}
