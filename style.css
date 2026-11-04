@@ -99,3 +99,48 @@ body.light .send-btn{background:linear-gradient(135deg,#5bcfbd,#8adfd2);box-shad
 .top-actions .icon-btn{flex:0 0 42px;}
 @media(max-width:760px){.topbar{height:auto;min-height:66px;padding:10px 12px;row-gap:9px}.top-actions{flex:1 1 190px;gap:6px}.top-actions .icon-btn{flex-basis:38px;width:38px;height:38px;font-size:20px}}
 @media(max-width:380px){.topbar{align-items:center}.compact{gap:8px}.brand-mark.small{width:38px;height:38px;font-size:23px;border-radius:13px}.compact .brand-name{font-size:18px}.compact .brand-sub{font-size:9px}.top-actions{flex-basis:100%;justify-content:flex-start}.top-actions .icon-btn{flex:1 1 38px;max-width:52px}}
+
+/* GATA v8 — refreshed responsive Liquid Glass interface */
+:root{--radius-xl:28px}
+body{background-attachment:fixed}
+.app-shell{width:100%}
+.topbar{position:relative;z-index:2;gap:12px}
+.top-actions{align-items:center}
+.top-actions .icon-btn{display:grid;place-items:center;position:relative;overflow:hidden}
+.top-actions .icon-btn:focus-visible,.tool-btn:focus-visible,.primary-btn:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 65%,white);outline-offset:3px}
+.top-actions .icon-btn:hover{transform:translateY(-2px)}
+.brand-mark{transition:transform .25s ease,box-shadow .25s ease}
+.brand-lockup:hover .brand-mark{transform:rotate(0) scale(1.04)}
+.auth-card,.sidebar,.conversation,.topbar{border-radius:var(--radius-xl)}
+.conversation-item{transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.conversation-item:hover{transform:translateY(-1px);border-color:var(--line)}
+.message-form{align-items:center}
+.message-form input{min-width:0}
+.send-btn{flex:none;display:grid;place-items:center;min-width:46px}
+.sent-image{cursor:zoom-in}
+@media(min-width:761px){
+ .workspace{grid-template-columns:minmax(270px,330px) minmax(0,1fr)}
+ .sidebar,.conversation{min-height:calc(100vh - 150px)}
+}
+@media(max-width:760px){
+ .app-shell{padding:9px}
+ .chat-view{gap:10px}
+ .topbar{padding:10px;border-radius:20px}
+ .top-actions{flex:1 1 100%;justify-content:space-between}
+ .top-actions .icon-btn{flex:1 1 0;max-width:54px;width:auto}
+ .workspace{gap:10px}
+ .sidebar{min-height:132px;max-height:190px;padding:12px}
+ .conversation{border-radius:20px}
+ .messages{padding:13px;gap:8px}
+ .bubble{max-width:88%;padding:9px 12px}
+ .chat-header{height:65px;padding:9px 13px}
+ .message-form{position:sticky;bottom:0;background:var(--panel);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:10px}
+}
+@media(max-width:380px){
+ .top-actions{gap:5px}
+ .top-actions .icon-btn{height:36px;max-width:48px;font-size:18px}
+ .compact .brand-name{font-size:17px}
+ .compact .brand-sub{letter-spacing:1px}
+ .message-form{gap:5px}
+}
+@media(hover:none){.conversation-item:hover,.primary-btn:hover,.icon-btn:hover{transform:none}}
