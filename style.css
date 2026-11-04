@@ -16,3 +16,60 @@
 @media(max-width:480px){.message-form{gap:6px;padding:9px}.tool-btn{width:36px}.send-btn{width:42px}.sent-image{max-width:65vw}}
 
 .file-picker{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;opacity:0;}
+
+
+/* Gata Liquid Glass — Light theme */
+body.light{
+ color-scheme:light;
+ --bg:#edf4f8;
+ --panel:rgba(255,255,255,.62);
+ --line:rgba(71,103,130,.16);
+ --text:#172b3d;
+ --muted:#687f91;
+ --accent:#38bcae;
+ --accent2:#7189e8;
+ --danger:#d95d70;
+ background:
+  radial-gradient(ellipse at 12% 12%,rgba(132,190,238,.48) 0,transparent 38%),
+  radial-gradient(ellipse at 88% 85%,rgba(117,218,200,.38) 0,transparent 34%),
+  linear-gradient(135deg,#f5f9fc,#e7f1f5 55%,#eef6f3);
+}
+body.light .bg-glow{background:linear-gradient(135deg,rgba(255,255,255,.55),transparent 48%)}
+body.light .glass{
+ background:rgba(255,255,255,.57);
+ border-color:rgba(255,255,255,.82);
+ box-shadow:0 22px 60px rgba(74,105,130,.14),inset 0 1px 0 rgba(255,255,255,.9);
+}
+body.light .auth-tabs{background:rgba(216,230,239,.7)}
+body.light .tab{color:#647b8d}
+body.light .tab.active{color:#183348;background:rgba(255,255,255,.9);box-shadow:0 3px 12px rgba(57,91,117,.1)}
+body.light .form label{color:#385268}
+body.light .form input,
+body.light .modal-card input,
+body.light .message-form input,
+body.light .setting-row select{
+ background:rgba(255,255,255,.78);
+ color:#172b3d;
+ border-color:rgba(91,126,151,.2);
+}
+body.light .icon-btn,
+body.light .close-btn,
+body.light .tool-btn{background:rgba(255,255,255,.58);color:#29465c;border-color:rgba(91,126,151,.2)}
+body.light .conversation-item{background:rgba(255,255,255,.38);color:#1b3448}
+body.light .conversation-item.active{background:rgba(56,188,174,.15);border-color:rgba(56,188,174,.42)}
+body.light .avatar{background:linear-gradient(145deg,#b8d2e7,#8baec8);color:#18364d}
+body.light .bubble{background:rgba(220,232,241,.95);color:#1a3043}
+body.light .bubble.mine{background:linear-gradient(135deg,#a7e7dc,#b5e4e9);color:#123b3a}
+body.light .bubble-meta{color:#5c7585}
+body.light .message-delete{color:#a34455}
+body.light .modal{background:rgba(31,54,73,.28)}
+body.light .toast{background:#173e43;color:#f1fffc}
+body.light .welcome-logo,
+body.light .brand-mark{box-shadow:0 12px 34px rgba(65,160,160,.22)}
+body.light .primary-btn{box-shadow:0 8px 24px rgba(56,155,150,.16)}
+.theme-float{
+ display:block;margin:0 0 18px auto;width:44px;height:44px;border:1px solid var(--line);
+ border-radius:15px;background:var(--panel);color:var(--text);font-size:20px;
+ box-shadow:0 8px 24px rgba(0,0,0,.08);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)
+}
+body.light .theme-float{background:rgba(255,255,255,.65);border-color:rgba(255,255,255,.9)}
