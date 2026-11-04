@@ -44,23 +44,7 @@ async function uploadMedia(file,kind){
  var payload={kind:kind,path:path,name:file.name||('voice.'+ext),mime:file.type};
  var ins=await db.from('messages').insert({conversation_id:currentConversation,sender_id:user.id,content:'GATA_MEDIA:'+JSON.stringify(payload)}).select().single();
  if(ins.error){await db.storage.from('gata-media').remove([path]);toast('تعذر إرسال الملف: '+ins.error.message);return;}
- await renderMessage(ins.data);sendPushNotification(ins.data.id);$('messages').scrollTop=$('messages').scrollHeight;
-}
-function urlBase64ToUint8Array(base64String){var padding='='.repeat((4-base64String.length%4)%4);var base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');var raw=atob(base64);var output=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)output[i]=raw.charCodeAt(i);return output;}
-async function savePushSubscription(subscription){var r=await db.functions.invoke('gata-push',{body:{action:'subscribe',subscription:subscription.toJSON()}});if(r.error)throw r.error;return r.data;}
-async function sendPushNotification(messageId){try{var r=await db.functions.invoke('gata-push',{body:{action:'notify',conversation_id:currentConversation,message_id:messageId}});if(r.error)console.warn('Push notification:',r.error.message);}catch(err){console.warn('Push notification unavailable:',err);}}
-async function enableNotifications(){
- if(!('Notification' in window)){toast('المتصفح لا يدعم الإشعارات');return;}
- if(!('serviceWorker' in navigator)||!('PushManager' in window)){toast('الإشعارات الفورية غير مدعومة في هذا المتصفح');return;}
- var permission=await Notification.requestPermission();
- if(permission!=='granted'){toast('لم يتم السماح بالإشعارات');return;}
- try{
-  var registration=await navigator.serviceWorker.ready;
-  var subscription=await registration.pushManager.getSubscription();
-  if(!subscription){subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array('BI8ChmtEYvxsG5ydvWefV6vrAS64S1idBLTDZfKa83efDomSGW7J0xQkagKQPSPhBIWLJDK5KI5bH3Q7wuSEN78')});}
-  await savePushSubscription(subscription);
-  toast('تم تفعيل إشعارات جتاب حتى عند إغلاق التطبيق');
- }catch(err){console.error(err);toast('تعذر تفعيل الإشعارات: '+(err.message||'حاول مرة أخرى'));}
+ await renderMessage(ins.data);$('messages').scrollTop=$('messages').scrollHeight;
 }
 function dateLabel(s){return new Date(s).toLocaleTimeString(language==='ar'?'ar-EG':'en-US',{hour:'2-digit',minute:'2-digit'});}
 function showAuth(tab){$('auth-view').classList.remove('hidden');$('chat-view').classList.add('hidden');$('login-form').classList.toggle('hidden',tab==='signup');$('signup-form').classList.toggle('hidden',tab!=='signup');$('show-login').classList.toggle('active',tab!=='signup');$('show-signup').classList.toggle('active',tab==='signup');note('');}
@@ -133,7 +117,7 @@ async function sendMessage(e){
  e.preventDefault();var input=$('message-input'),content=input.value.trim();if(!content||!currentConversation)return;
  input.value='';var r=await db.from('messages').insert({conversation_id:currentConversation,sender_id:user.id,content:content}).select().single();
  if(r.error){toast('تعذر إرسال الرسالة: '+r.error.message);input.value=content;return;}
- await renderMessage(r.data);sendPushNotification(r.data.id);$('messages').scrollTop=$('messages').scrollHeight;
+ await renderMessage(r.data);$('messages').scrollTop=$('messages').scrollHeight;
 }
 function subscribeGlobal(){
  if(channel)db.removeChannel(channel);
@@ -206,7 +190,6 @@ function initEvents(){
  };
  $('change-avatar-btn').onclick=function(){openFilePicker($('avatar-file-input'));};
  $('avatar-file-input').onchange=function(){if(this.files&&this.files[0])changeAvatar(this.files[0]);this.value='';};
- $('enable-notifications-btn').onclick=enableNotifications;
 }
 async function boot(){initEvents();applyLanguage();var s=await db.auth.getSession();if(s.data.session){user=s.data.session.user;try{await enterApp();}catch(e){showAuth('login');note('تعذر تحميل الحساب: '+e.message);}}else showAuth('login');}
 document.addEventListener('DOMContentLoaded',boot);
