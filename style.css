@@ -288,3 +288,16 @@ body.light .chat-search-wrap input{color:#172b3d}
 .settings-item-static{cursor:default}
 body.light .settings-screen{background:#f5f7f8}body.light .settings-profile{background:rgba(255,255,255,.76)}body.light .settings-top{background:rgba(245,248,249,.9)}
 @media(min-width:760px){.settings-screen{left:50%;right:auto;width:min(100%,620px);transform:translateX(-50%);box-shadow:0 0 0 100vmax #020611b8,0 15px 70px #0005}.settings-profile{padding-bottom:28px}}
+
+/* GTA v24 privacy controls */
+.privacy-panel{padding:4px 10px 12px;border-bottom:1px solid var(--line)}
+.privacy-option{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:15px 2px;border-bottom:1px solid var(--line)}
+.privacy-option>div{display:grid;gap:4px;min-width:0}.privacy-option strong{font-size:13px}.privacy-option small,.privacy-note{font-size:11px;line-height:1.7;color:var(--muted)}
+.privacy-switch{position:relative;display:inline-flex;flex:none;width:48px;height:28px}
+.privacy-switch input{position:absolute;opacity:0;width:1px;height:1px}
+.privacy-switch span{position:absolute;inset:0;border-radius:30px;background:#8795a5;transition:.2s;cursor:pointer}
+.privacy-switch span:before{content:"";position:absolute;width:20px;height:20px;top:4px;right:4px;border-radius:50%;background:white;transition:.2s;box-shadow:0 1px 4px #0003}
+.privacy-switch input:checked+span{background:var(--accent)}
+.privacy-switch input:checked+span:before{transform:translateX(-20px)}
+.privacy-switch input:focus-visible+span{outline:2px solid var(--accent2);outline-offset:3px}
+.privacy-note{margin:12px 2px 2px}
