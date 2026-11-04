@@ -158,24 +158,25 @@ async function changeAvatar(file){
  var url=db.storage.from('gata-avatars').getPublicUrl(path).data.publicUrl,upd=await db.from('profiles').update({avatar_url:url}).eq('id',user.id);if(upd.error){toast('تعذر حفظ الصورة: '+upd.error.message);return;}
  if(profileData)profileData.avatar_url=url;setAvatar($('chat-avatar'),url);toast('تم تحديث الصورة الشخصية');
 }
+function openFilePicker(input){if(!input)return;try{if(typeof input.showPicker==='function'){input.showPicker();return;}}catch(e){}input.click();}
 function initEvents(){
  $('show-login').onclick=function(){showAuth('login');};$('show-signup').onclick=function(){showAuth('signup');};
  $('login-form').addEventListener('submit',login);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);
  $('new-chat-btn').onclick=openModal;$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
  $('logout-btn').onclick=logout;$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};
  $('language-select').onchange=function(){language=this.value;localStorage.setItem('gata-language',language);applyLanguage();};
- $('attach-image-btn').onclick=function(){$('image-file-input').click();};
+ $('attach-image-btn').onclick=function(){openFilePicker($('image-file-input'));};
  $('image-file-input').onchange=function(){if(this.files&&this.files[0])uploadMedia(this.files[0],'image');this.value='';};
  $('record-audio-btn').onclick=async function(){
   if(mediaRecorder&&mediaRecorder.state==='recording'){mediaRecorder.stop();this.textContent='🎙';this.classList.remove('recording');return;}
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){toast('تسجيل الصوت غير مدعوم في هذا المتصفح');return;}
-  try{var stream=await navigator.mediaDevices.getUserMedia({audio:true});recordedChunks=[];mediaRecorder=new MediaRecorder(stream);
+  try{var stream=await navigator.mediaDevices.getUserMedia({audio:true});recordedChunks=[];var audioTypes=['audio/webm;codecs=opus','audio/ogg;codecs=opus','audio/mp4'];var chosen=audioTypes.find(function(t){return MediaRecorder.isTypeSupported(t);});mediaRecorder=chosen?new MediaRecorder(stream,{mimeType:chosen}):new MediaRecorder(stream);
    mediaRecorder.ondataavailable=function(e){if(e.data.size)recordedChunks.push(e.data);};
-   mediaRecorder.onstop=function(){var blob=new Blob(recordedChunks,{type:mediaRecorder.mimeType||'audio/webm'});stream.getTracks().forEach(function(t){t.stop();});var mime=(blob.type.split(';')[0]||'audio/webm'),ext=(mime.split('/')[1]||'webm');uploadMedia(new File([blob],'voice.'+ext,{type:mime}),'audio');};
+   mediaRecorder.onstop=function(){var blob=new Blob(recordedChunks,{type:mediaRecorder.mimeType||'audio/webm'});stream.getTracks().forEach(function(t){t.stop();});var mime=(blob.type.split(';')[0]||'audio/webm');if(!['audio/webm','audio/ogg','audio/mp4','audio/mpeg'].includes(mime)){toast('صيغة التسجيل غير مدعومة على هذا الجهاز');return;}var ext=mime==='audio/ogg'?'ogg':mime==='audio/mp4'?'mp4':mime==='audio/mpeg'?'mp3':'webm';uploadMedia(new File([blob],'voice.'+ext,{type:mime}),'audio');};
    mediaRecorder.start();this.textContent='■';this.classList.add('recording');toast('التسجيل شغال… اضغط الزر مرة تانية للإرسال');
   }catch(err){toast('لازم تسمح باستخدام الميكروفون');}
  };
- $('change-avatar-btn').onclick=function(){$('avatar-file-input').click();};
+ $('change-avatar-btn').onclick=function(){openFilePicker($('avatar-file-input'));};
  $('avatar-file-input').onchange=function(){if(this.files&&this.files[0])changeAvatar(this.files[0]);this.value='';};
  $('enable-notifications-btn').onclick=enableNotifications;
 }
