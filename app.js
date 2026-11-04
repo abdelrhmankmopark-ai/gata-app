@@ -98,6 +98,15 @@ async function loadConversations(){
   var peerId=(members.data||[]).map(function(m){return m.user_id;}).find(function(id){return id!==user.id;});
   var peer=null;if(peerId){var pr=await db.from('profiles').select('username,display_name,last_seen,avatar_url').eq('id',peerId).maybeSingle();peer=pr.data;}
   var name=c.title||(peer?(peer.display_name||peer.username):'محادثة');
+  var latest=await db.from('messages').select('content,created_at,sender_id').eq('conversation_id',c.id).order('created_at',{ascending:false}).limit(1).maybeSingle();
+  var preview=peer?'@'+peer.username:'ابدأ المحادثة';
+  var time='';
+  if(latest.data){
+   var media=isMedia(latest.data.content);
+   preview=media?(media.kind==='image'?'📷 صورة':'🎙 رسالة صوتية'):String(latest.data.content||'');
+   if(latest.data.sender_id===user.id)preview='أنت: '+preview;
+   time=dateLabel(latest.data.created_at);
+  }
   var unreadCount=0;
   try{
    var incoming=await db.from('messages').select('id').eq('conversation_id',c.id).neq('sender_id',user.id);
@@ -109,7 +118,7 @@ async function loadConversations(){
   }catch(err){}
   if(currentConversation===c.id)unreadCount=0;
   var b=document.createElement('button');b.className='conversation-item'+(currentConversation===c.id?' active':'');
-  b.innerHTML=avatarHTML(peer&&peer.avatar_url,name)+'<div class="conversation-info"><strong>'+safe(name)+'</strong><span>@'+safe(peer?peer.username:'')+'</span></div>'+(unreadCount?'<span class="unread-badge" aria-label="'+unreadCount+' رسائل غير مقروءة">'+(unreadCount>99?'99+':unreadCount)+'</span>':'');
+  b.innerHTML=avatarHTML(peer&&peer.avatar_url,name)+'<div class="conversation-info"><strong>'+safe(name)+'</strong><span class="conversation-preview">'+safe(preview)+'</span></div><div class="conversation-side">'+(time?'<time class="conversation-time">'+safe(time)+'</time>':'')+(unreadCount?'<span class="unread-badge" aria-label="'+unreadCount+' رسائل غير مقروءة">'+(unreadCount>99?'99+':unreadCount)+'</span>':'')+'</div>';
   b.addEventListener('click',(function(id,p,n){return function(){openConversation(id,p,n);};})(c.id,peerId,name));box.appendChild(b);
  }
 }
