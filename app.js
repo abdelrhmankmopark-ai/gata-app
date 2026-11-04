@@ -5,6 +5,7 @@ var SUPABASE_URL='https://gncoeyferzqhyhfwwmyr.supabase.co';
 var SUPABASE_KEY='sb_publishable_N0YCbA8bfJMOZ3JVRj2TlA_iBJQrpsp';
 var db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 var user=null,currentConversation=null,currentPeer=null,channel=null,heartbeat=null,mediaRecorder=null,recordedChunks=[],profileData=null,language=localStorage.getItem('gata-language')||'ar';
+var statusViewerProfiles=[],statusViewerIndex=0;
 function privacyPref(key,defaultValue){try{var v=localStorage.getItem('gata-privacy-'+key);return v===null?defaultValue:v==='true';}catch(e){return defaultValue;}}
 function setPrivacyPref(key,value){try{localStorage.setItem('gata-privacy-'+key,String(!!value));}catch(e){toast('تعذر حفظ الإعداد على الجهاز');}}
 function applyPrivacySettings(){if($('privacy-last-seen'))$('privacy-last-seen').checked=privacyPref('last-seen',true);if($('privacy-read-receipts'))$('privacy-read-receipts').checked=privacyPref('read-receipts',true);}
@@ -97,12 +98,16 @@ function parseStatusPayload(profile){
  if(profile.status_media_path&&['image','video','audio'].includes(profile.status_media_kind))return {type:profile.status_media_kind,path:profile.status_media_path,text:profile.status_caption||''};
  return {type:'text',text:profile.status_text||''};
 }
+function closeStatusViewer(){var panel=$('status-viewer');if(panel)panel.classList.add('hidden');var content=$('status-viewer-content');if(content){content.querySelectorAll('video,audio').forEach(function(m){try{m.pause();}catch(e){}});content.innerHTML='';}}
 function statusIsActive(p){
  var t=p&&p.status_updated_at?new Date(p.status_updated_at).getTime():0;
  return !!(p&&(p.status_text||p.status_media_path)&&t&&Date.now()-t>=0&&Date.now()-t<86400000);
 }
 async function showStatusViewer(profileId){
+ var found=statusViewerProfiles.findIndex(function(p){return p.id===profileId;});if(found>=0)statusViewerIndex=found;
  var panel=$('status-viewer'),content=$('status-viewer-content'),owner=$('status-viewer-owner'),time=$('status-viewer-time'),del=$('delete-my-status');
+ var progress=$('status-viewer-progress');if(progress){progress.innerHTML='';statusViewerProfiles.forEach(function(p,i){var seg=document.createElement('span');seg.className='status-progress-segment'+(i<=statusViewerIndex?' active':'');progress.appendChild(seg);});}
+ var prev=$('status-viewer-prev'),next=$('status-viewer-next');if(prev)prev.disabled=statusViewerIndex<=0;if(next)next.disabled=statusViewerIndex>=statusViewerProfiles.length-1;
  panel.classList.remove('hidden');content.innerHTML='<span>جاري تحميل الحالة...</span>';owner.textContent='';time.textContent='';del.classList.add('hidden');
  var data=null;
  if(profileId===user.id)data=profileData||await ensureProfile();
@@ -192,7 +197,8 @@ async function deleteMyStatus(){
 var statusRecorder=null;
 async function loadFriendStatuses(conversationIds){
  var list=$('friend-status-list');if(!list)return;
- list.innerHTML='';
+ list.innerHTML='';statusViewerProfiles=[];
+ if(profileData&&statusIsActive(profileData))statusViewerProfiles.push(profileData);
  function addStatus(p,isMine){
   var active=statusIsActive(p),payload=parseStatusPayload(p);
   var name=isMine?'حالتي':(p.display_name||p.username||'صديق');
@@ -224,6 +230,7 @@ async function loadFriendStatuses(conversationIds){
  if(profiles.error){list.insertAdjacentHTML('beforeend','<span class="status-empty">تعذر تحميل الحالات</span>');return;}
  var active=(profiles.data||[]).filter(function(p){return statusIsActive(p);});
  active.sort(function(a,b){return new Date(b.status_updated_at).getTime()-new Date(a.status_updated_at).getTime();});
+ statusViewerProfiles=statusViewerProfiles.concat(active);
  if(!active.length){list.insertAdjacentHTML('beforeend','<span class="status-empty">لا توجد حالات جديدة</span>');return;}
  active.forEach(function(p){addStatus(p,false);});
 }
@@ -437,7 +444,7 @@ function initEvents(){
  $('chat-search').addEventListener('input',filterConversations);
  $('refresh-app-btn').onclick=function(){closeTopMenu();refreshApp();};$('new-chat-btn').onclick=function(){closeTopMenu();openModal();};$('contacts-btn').onclick=function(){closeTopMenu();openContacts();};
  var bottomNav=$('bottom-nav');if(bottomNav){bottomNav.addEventListener('click',function(ev){var item=ev.target.closest('[data-nav]');if(!item)return;var key=item.getAttribute('data-nav');if(key==='chats'){showChats();bottomNav.querySelectorAll('.bottom-nav-item').forEach(function(b){b.classList.toggle('active',b===item);if(b===item)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});showChats();return;}if(key==='updates'){showUpdates();bottomNav.querySelectorAll('.bottom-nav-item').forEach(function(b){b.classList.toggle('active',b===item);if(b===item)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});return;}toast('القسم ده هيتاح قريبًا');});}$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
- $('close-image-preview').onclick=closeImagePreview;$('image-preview').addEventListener('click',function(ev){if(ev.target===$('image-preview'))closeImagePreview();});document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){$('status-viewer').classList.add('hidden');closeTopMenu();closeImagePreview();$('modal').classList.add('hidden');$('settings-panel').classList.add('hidden');$('public-profile-view').classList.add('hidden');}});
+ $('close-image-preview').onclick=closeImagePreview;$('image-preview').addEventListener('click',function(ev){if(ev.target===$('image-preview'))closeImagePreview();});document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){closeStatusViewer();closeTopMenu();closeImagePreview();$('modal').classList.add('hidden');$('settings-panel').classList.add('hidden');$('public-profile-view').classList.add('hidden');}});
  $('logout-btn').onclick=function(){closeTopMenu();logout();};$('open-my-profile').onclick=function(){showPublicProfile(user.id);};$('profile-bio-input').addEventListener('input',function(){$('profile-bio-count').textContent=this.value.length;});$('profile-status-input').addEventListener('input',function(){$('profile-status-count').textContent=this.value.length;});$('close-public-profile').onclick=function(){$('public-profile-view').classList.add('hidden');};$('public-profile-view').onclick=function(ev){if(ev.target===$('public-profile-view'))$('public-profile-view').classList.add('hidden');};$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');if(profileData){$('settings-display-name').textContent=profileData.display_name||profileData.username;$('settings-user').textContent='@'+profileData.username;$('profile-display-name').value=profileData.display_name||'';$('profile-bio-input').value=profileData.bio||'';$('profile-bio-count').textContent=($('profile-bio-input').value||'').length;$('profile-status-input').value=String(profileData.status_text||'').indexOf('GATA_STATUS:')===0?'':(profileData.status_text||'');$('profile-status-count').textContent=($('profile-status-input').value||'').length;setAvatar($('settings-avatar'),profileData.avatar_url);}};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};$('save-profile-btn').onclick=saveProfileName;$('settings-account-row').onclick=function(){$('profile-editor').classList.toggle('hidden');};$('settings-privacy-row').onclick=function(){$('privacy-panel').classList.toggle('hidden');applyPrivacySettings();};$('settings-storage-row').onclick=function(){$('storage-panel').classList.toggle('hidden');if(!$('storage-panel').classList.contains('hidden'))loadStorageStats();};$('settings-device-row').onclick=function(){$('device-panel').classList.toggle('hidden');if(!$('device-panel').classList.contains('hidden'))loadSessionInfo();};$('signout-other-sessions').onclick=signOutOtherSessions;$('settings-help-row').onclick=function(){$('help-panel').classList.toggle('hidden');$('about-panel').classList.add('hidden');};$('settings-about-row').onclick=function(){$('about-panel').classList.toggle('hidden');$('help-panel').classList.add('hidden');};$('storage-refresh-btn').onclick=loadStorageStats;$('privacy-last-seen').onchange=function(){setPrivacyPref('last-seen',this.checked);if(this.checked&&user)db.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',user.id);toast(this.checked?'تم تفعيل مشاركة آخر ظهور':'تم إيقاف مشاركة آخر ظهور');};$('privacy-read-receipts').onchange=function(){setPrivacyPref('read-receipts',this.checked);toast(this.checked?'تم تفعيل تأكيدات القراءة':'تم إيقاف تأكيدات القراءة');};
  $('language-select').onchange=function(){language=this.value;localStorage.setItem('gata-language',language);applyLanguage();};
 
@@ -447,8 +454,10 @@ function initEvents(){
  $('status-media-input').onchange=function(){if(this.files&&this.files[0])publishStatusFile(this.files[0],'image');this.value='';};
  $('status-video-input').onchange=function(){if(this.files&&this.files[0])publishStatusFile(this.files[0],'video');this.value='';};
  $('record-status-audio').onclick=recordStatusAudio;
- $('close-status-viewer').onclick=function(){$('status-viewer').classList.add('hidden');$('status-viewer-content').innerHTML='';};
- $('status-viewer').onclick=function(ev){if(ev.target===$('status-viewer')){$('status-viewer').classList.add('hidden');$('status-viewer-content').innerHTML='';}};
+ $('close-status-viewer').onclick=function(){closeStatusViewer();};
+ $('status-viewer-prev').onclick=function(){if(statusViewerIndex>0)showStatusViewer(statusViewerProfiles[statusViewerIndex-1].id);};
+ $('status-viewer-next').onclick=function(){if(statusViewerIndex<statusViewerProfiles.length-1)showStatusViewer(statusViewerProfiles[statusViewerIndex+1].id);};
+ $('status-viewer').onclick=function(ev){if(ev.target===$('status-viewer'))closeStatusViewer();};
  $('delete-my-status').onclick=deleteMyStatus;
 
  $('attach-image-btn').onclick=function(){openFilePicker($('image-file-input'));};
