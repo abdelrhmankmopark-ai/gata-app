@@ -23,7 +23,7 @@
   });
 })();
 </script><meta name="description" content="جتا آب - محادثاتك في مكان واحد">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata25">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata26">
 <title>جتا آب | GTA App</title>
 </head>
 <body>
@@ -95,12 +95,23 @@
   <div class="settings-item settings-item-static"><span class="settings-item-icon">🔔</span><span class="settings-item-copy"><strong>الإشعارات</strong><small>تنبيهات الرسائل الجديدة</small></span><span class="settings-soon">قريبًا</span></div>
   <button class="settings-item" id="settings-storage-row" type="button"><span class="settings-item-icon">▣</span><span class="settings-item-copy"><strong>التخزين والبيانات</strong><small>عرض مساحة المرفقات والملفات</small></span><span class="settings-chevron">‹</span></button>
  <div id="storage-panel" class="storage-panel hidden"><div class="storage-summary"><div class="storage-total" id="storage-total">—</div><small>إجمالي حجم ملفاتك المرفوعة</small></div><div class="storage-stats"><div><strong id="storage-count">—</strong><small>عدد الملفات</small></div><div><strong id="storage-images">—</strong><small>الصور</small></div><div><strong id="storage-audio">—</strong><small>التسجيلات</small></div></div><div class="storage-progress"><span id="storage-progress-bar"></span></div><p id="storage-status" class="privacy-note">اضغط تحديث لحساب مساحة ملفاتك.</p><button id="storage-refresh-btn" class="primary-btn storage-refresh" type="button">تحديث البيانات</button></div>
-  <div class="settings-item settings-item-static"><span class="settings-item-icon">◷</span><span class="settings-item-copy"><strong>المساعدة والملاحظات</strong><small>معلومات ومساعدة استخدام جتا آب</small></span><span class="settings-soon">قريبًا</span></div>
-  <div class="settings-item settings-item-static"><span class="settings-item-icon">ⓘ</span><span class="settings-item-copy"><strong>عن التطبيق</strong><small>جتا آب · GTA App</small></span><span class="settings-chevron">›</span></div>
+  <button class="settings-item" id="settings-help-row" type="button"><span class="settings-item-icon">◷</span><span class="settings-item-copy"><strong>المساعدة والملاحظات</strong><small>إجابات سريعة عن استخدام جتا آب</small></span><span class="settings-chevron">‹</span></button>
+  <div id="help-panel" class="info-panel hidden">
+   <h3>مساعدة استخدام جتا آب</h3>
+   <details><summary>إزاي أبدأ محادثة؟</summary><p>اضغط علامة + أو «ابدأ محادثة»، واكتب اسم المستخدم كاملًا، وبعد ظهور الحساب اضغط «مراسلة».</p></details>
+   <details><summary>إزاي أبعت صورة؟</summary><p>افتح المحادثة واضغط رمز الصورة ▧، واختار صورة JPG أو PNG أو WebP بحجم لا يتجاوز 5 ميجابايت.</p></details>
+   <details><summary>إزاي أبعت تسجيل صوتي؟</summary><p>اضغط زر الميكروفون واسمح باستخدام الميكروفون عند الطلب. اضغط الزر مرة ثانية لإيقاف التسجيل وإرساله.</p></details>
+   <details><summary>إزاي أغيّر اسمي أو صورتي؟</summary><p>افتح الإعدادات ثم الحساب لتغيير اسم العرض، أو اضغط علامة الكاميرا فوق صورتك لتغيير الصورة.</p></details>
+   <details><summary>إزاي أحذف محادثة؟</summary><p>من قائمة المحادثات اضغط رمز سلة المهملات بجوار المحادثة، ثم أكّد الحذف. ده بيشيلها من قائمتك فقط، ومش بيمسحها من حساب الطرف الآخر.</p></details>
+   <details><summary>ليه مش بيظهر إشعار برسالة جديدة؟</summary><p>الإشعارات الفورية لسه مش مفعّلة في الإصدار الحالي. افتح جتا آب وتابع المحادثات مباشرة.</p></details>
+   <p class="info-note">لو واجهت مشكلة، حدّث الصفحة من زر ↻ وجرب تاني. ما تشاركش كلمة مرورك مع أي حد.</p>
+  </div>
+  <button class="settings-item" id="settings-about-row" type="button"><span class="settings-item-icon">ⓘ</span><span class="settings-item-copy"><strong>عن التطبيق</strong><small>معلومات الإصدار وهوية جتا آب</small></span><span class="settings-chevron">‹</span></button>
+  <div id="about-panel" class="info-panel hidden"><div class="about-mark">G</div><h3>جتا آب · GTA App</h3><p>تواصل بطريقتك.</p><div class="about-version"><span>الإصدار</span><strong>1.0.0</strong></div><div class="about-version"><span>نوع التطبيق</span><strong>تطبيق ويب قابل للتثبيت (PWA)</strong></div><p class="info-note">جتا آب مشروع مستقل للمراسلة. بعض الخصائص، مثل الإشعارات الفورية، قد لا تكون متاحة في الإصدار الحالي.</p></div>
  </div>
 </div>
   </section>
 </main>
 <div id="toast" class="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata25"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata26"></script>
 </body></html>
