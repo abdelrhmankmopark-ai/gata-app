@@ -428,3 +428,12 @@ body.light .updates-panel .friend-status-avatar{box-shadow:0 7px 18px rgba(62,11
 .updates-panel .friend-status-avatar>img{border-radius:50%;overflow:hidden}
 .updates-panel .friend-status-avatar .status-avatar-fallback{overflow:hidden}
 .updates-panel .friend-status-item .status-add-mark{z-index:3;inset-inline-end:-5px;bottom:-4px;width:25px;height:25px;box-shadow:0 2px 8px #0005}
+
+/* GATA v43 — status viewer navigation and progress */
+.status-viewer-progress{position:absolute;top:calc(env(safe-area-inset-top) + 12px);left:18px;right:18px;display:flex;gap:4px;z-index:3;height:4px}
+.status-progress-segment{height:4px;flex:1;border-radius:8px;background:#ffffff55;overflow:hidden}
+.status-progress-segment.active{background:#fff}
+.status-viewer-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:42px;height:72px;border:0;border-radius:14px;background:#ffffff18;color:#fff;font-size:38px;line-height:1}
+.status-viewer-nav.prev{left:8px}.status-viewer-nav.next{right:8px}.status-viewer-nav:disabled{opacity:.18;pointer-events:none}
+.status-viewer-card{padding-top:18px}
+@media(max-width:600px){.status-viewer{padding:12px}.status-viewer-card{width:100%;min-height:65vh;max-height:86vh}.status-viewer-content{min-height:48vh}.status-viewer-nav{width:34px;height:58px;background:#0005}}
