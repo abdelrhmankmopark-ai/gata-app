@@ -23,7 +23,7 @@
   });
 })();
 </script><meta name="description" content="جتا آب - محادثاتك في مكان واحد">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata23">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata24">
 <title>جتا آب | GTA App</title>
 </head>
 <body>
@@ -85,7 +85,12 @@
  <div class="settings-menu">
   <button class="settings-item" id="settings-account-row" type="button"><span class="settings-item-icon">♙</span><span class="settings-item-copy"><strong>الحساب</strong><small>تعديل اسم العرض وبيانات حسابك</small></span><span class="settings-chevron">‹</span></button>
   <div id="profile-editor" class="profile-editor settings-editor hidden"><label for="profile-display-name">اسم العرض</label><input id="profile-display-name" maxlength="32" placeholder="اكتب اسمك الظاهر"><button id="save-profile-btn" class="primary-btn" type="button">حفظ التغييرات</button></div>
-  <div class="settings-item settings-item-static"><span class="settings-item-icon">🔒</span><span class="settings-item-copy"><strong>الخصوصية</strong><small>إعدادات الخصوصية والأمان</small></span><span class="settings-soon">قريبًا</span></div>
+  <button class="settings-item" id="settings-privacy-row" type="button"><span class="settings-item-icon">🔒</span><span class="settings-item-copy"><strong>الخصوصية</strong><small>التحكم في آخر ظهور وتأكيدات القراءة</small></span><span class="settings-chevron">‹</span></button>
+ <div id="privacy-panel" class="privacy-panel hidden">
+  <div class="privacy-option"><div><strong>مشاركة آخر ظهور</strong><small>السماح للتطبيق بتحديث حالة اتصالك للآخرين.</small></div><label class="privacy-switch"><input id="privacy-last-seen" type="checkbox" checked><span></span></label></div>
+  <div class="privacy-option"><div><strong>تأكيدات القراءة</strong><small>عند إيقافها، لن تسجل قراءة الرسائل ولن تظهر لك علامات القراءة.</small></div><label class="privacy-switch"><input id="privacy-read-receipts" type="checkbox" checked><span></span></label></div>
+  <p class="privacy-note">الإعدادات دي محفوظة على الجهاز ده فقط. قد يستغرق اختفاء آخر ظهور سابق دقيقة تقريبًا.</p>
+ </div>
   <button class="settings-item" id="settings-language-row" type="button"><span class="settings-item-icon">🌐</span><span class="settings-item-copy"><strong>لغة التطبيق</strong><small>اختار اللغة المناسبة</small></span><span class="settings-inline-control"><select id="language-select"><option value="ar">العربية</option><option value="en">English</option></select></span></button>
   <div class="settings-item settings-item-static"><span class="settings-item-icon">🔔</span><span class="settings-item-copy"><strong>الإشعارات</strong><small>تنبيهات الرسائل الجديدة</small></span><span class="settings-soon">قريبًا</span></div>
   <div class="settings-item settings-item-static"><span class="settings-item-icon">▣</span><span class="settings-item-copy"><strong>التخزين والبيانات</strong><small>إدارة الصور والملفات</small></span><span class="settings-soon">قريبًا</span></div>
@@ -96,5 +101,5 @@
   </section>
 </main>
 <div id="toast" class="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata23"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata24"></script>
 </body></html>
