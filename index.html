@@ -23,7 +23,7 @@
   });
 })();
 </script><meta name="description" content="جتا آب - محادثاتك في مكان واحد">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata26">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata27">
 <title>جتا آب | GTA App</title>
 </head>
 <body>
@@ -95,6 +95,18 @@
   <div class="settings-item settings-item-static"><span class="settings-item-icon">🔔</span><span class="settings-item-copy"><strong>الإشعارات</strong><small>تنبيهات الرسائل الجديدة</small></span><span class="settings-soon">قريبًا</span></div>
   <button class="settings-item" id="settings-storage-row" type="button"><span class="settings-item-icon">▣</span><span class="settings-item-copy"><strong>التخزين والبيانات</strong><small>عرض مساحة المرفقات والملفات</small></span><span class="settings-chevron">‹</span></button>
  <div id="storage-panel" class="storage-panel hidden"><div class="storage-summary"><div class="storage-total" id="storage-total">—</div><small>إجمالي حجم ملفاتك المرفوعة</small></div><div class="storage-stats"><div><strong id="storage-count">—</strong><small>عدد الملفات</small></div><div><strong id="storage-images">—</strong><small>الصور</small></div><div><strong id="storage-audio">—</strong><small>التسجيلات</small></div></div><div class="storage-progress"><span id="storage-progress-bar"></span></div><p id="storage-status" class="privacy-note">اضغط تحديث لحساب مساحة ملفاتك.</p><button id="storage-refresh-btn" class="primary-btn storage-refresh" type="button">تحديث البيانات</button></div>
+  <button class="settings-item" id="settings-device-row" type="button"><span class="settings-item-icon">📱</span><span class="settings-item-copy"><strong>الأجهزة والجلسات</strong><small>معلومات جلسة الدخول الحالية وإدارة الجلسات الأخرى</small></span><span class="settings-chevron">‹</span></button>
+  <div id="device-panel" class="info-panel hidden">
+   <h3>جلسة الدخول الحالية</h3>
+   <div class="session-device-card"><div class="session-device-icon">📱</div><div><strong id="session-device-name">جاري تحديد الجهاز...</strong><small id="session-device-platform">—</small></div><span class="session-current-badge">الجهاز الحالي</span></div>
+   <div class="about-version"><span>الحساب</span><strong id="session-account">—</strong></div>
+   <div class="about-version"><span>معرّف الجلسة</span><strong id="session-id">—</strong></div>
+   <div class="about-version"><span>انتهاء رمز الدخول الحالي</span><strong id="session-expiry">—</strong></div>
+   <p class="info-note">الموقع يقدر يعرض الجلسة المفتوحة على الجهاز ده فقط، ومش بيعرض قائمة موثوقة بكل الأجهزة المسجّل عليها الحساب.</p>
+   <button id="signout-other-sessions" class="danger-action" type="button">تسجيل الخروج من الأجهزة الأخرى</button>
+   <p id="session-action-status" class="privacy-note">الجهاز الحالي هيفضل مسجّل الدخول عند استخدام الزر أعلاه.</p>
+  </div>
+
   <button class="settings-item" id="settings-help-row" type="button"><span class="settings-item-icon">◷</span><span class="settings-item-copy"><strong>المساعدة والملاحظات</strong><small>إجابات سريعة عن استخدام جتا آب</small></span><span class="settings-chevron">‹</span></button>
   <div id="help-panel" class="info-panel hidden">
    <h3>مساعدة استخدام جتا آب</h3>
@@ -113,5 +125,5 @@
   </section>
 </main>
 <div id="toast" class="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata26"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata27"></script>
 </body></html>
