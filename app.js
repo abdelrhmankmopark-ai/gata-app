@@ -63,6 +63,8 @@ async function uploadMedia(file,kind){
  if(ins.error){await db.storage.from('gata-media').remove([path]);toast('تعذر إرسال الملف: '+ins.error.message);return;}
  await renderMessage(ins.data);$('messages').scrollTop=$('messages').scrollHeight;
 }
+function openImagePreview(url){var layer=$('image-preview'),img=$('image-preview-content');img.src=url;layer.classList.remove('hidden');$('close-image-preview').focus();}
+function closeImagePreview(){var layer=$('image-preview');layer.classList.add('hidden');$('image-preview-content').removeAttribute('src');}
 function dateLabel(s){return new Date(s).toLocaleTimeString(language==='ar'?'ar-EG':'en-US',{hour:'2-digit',minute:'2-digit'});}
 function showAuth(tab){$('auth-view').classList.remove('hidden');$('chat-view').classList.add('hidden');$('login-form').classList.toggle('hidden',tab==='signup');$('signup-form').classList.toggle('hidden',tab!=='signup');$('show-login').classList.toggle('active',tab!=='signup');$('show-signup').classList.toggle('active',tab==='signup');note('');}
 function applyLanguage(){document.documentElement.lang=language;document.documentElement.dir=language==='ar'?'rtl':'ltr';document.body.dir=document.documentElement.dir;$('message-input').placeholder=tr('write');$('settings-title');$('language-select').value=language;var labels=document.querySelectorAll('[data-i18n]');labels.forEach(function(el){el.textContent=tr(el.dataset.i18n);});}
@@ -124,7 +126,7 @@ async function loadMessages(){
 async function renderMessage(m){
  var box=$('messages'),div=document.createElement('div');div.className='bubble'+(m.sender_id===user.id?' mine':'');div.dataset.id=m.id;
  var body=document.createElement('div'),media=isMedia(m.content);
- if(media){try{var url=await mediaUrl(media.path);if(media.kind==='image'){var im=document.createElement('img');im.src=url;im.alt='صورة مرسلة';im.className='sent-image';body.appendChild(im);}else{var au=document.createElement('audio');au.controls=true;au.preload='metadata';au.src=url;au.className='sent-audio';body.appendChild(au);}}catch(err){body.textContent='تعذر تحميل المرفق';}}
+ if(media){try{var url=await mediaUrl(media.path);if(media.kind==='image'){var im=document.createElement('img');im.src=url;im.alt='صورة مرسلة';im.className='sent-image';im.loading='lazy';im.addEventListener('click',function(){openImagePreview(url);});im.setAttribute('role','button');im.setAttribute('tabindex','0');im.setAttribute('aria-label','فتح الصورة بحجم أكبر');im.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openImagePreview(url);}});body.appendChild(im);}else{var au=document.createElement('audio');au.controls=true;au.preload='metadata';au.src=url;au.className='sent-audio';body.appendChild(au);}}catch(err){body.textContent='تعذر تحميل المرفق';}}
  else body.textContent=m.content;
  var meta=document.createElement('div');meta.className='bubble-meta';var time=document.createElement('span');time.textContent=dateLabel(m.created_at);meta.appendChild(time);
  if(m.sender_id===user.id){var read=await db.from('message_reads').select('message_id').eq('message_id',m.id).neq('reader_id',user.id);var rs=document.createElement('span');rs.className='read-state';rs.textContent=read.data&&read.data.length?'✓✓':'✓';meta.appendChild(rs);}
@@ -226,6 +228,7 @@ function initEvents(){
  $('theme-toggle').onclick=toggleTheme;$('theme-toggle-auth').onclick=toggleTheme;
  $('login-form').addEventListener('submit',login);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);
  $('refresh-app-btn').onclick=refreshApp;$('new-chat-btn').onclick=openModal;$('contacts-btn').onclick=openContacts;$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
+ $('close-image-preview').onclick=closeImagePreview;$('image-preview').addEventListener('click',function(ev){if(ev.target===$('image-preview'))closeImagePreview();});document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){closeImagePreview();$('modal').classList.add('hidden');$('settings-panel').classList.add('hidden');}});
  $('logout-btn').onclick=logout;$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};$('save-profile-btn').onclick=saveProfileName;
  $('language-select').onchange=function(){language=this.value;localStorage.setItem('gata-language',language);applyLanguage();};
  $('attach-image-btn').onclick=function(){openFilePicker($('image-file-input'));};
