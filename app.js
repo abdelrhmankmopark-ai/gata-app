@@ -194,11 +194,24 @@ async function loadFriendStatuses(conversationIds){
  var list=$('friend-status-list');if(!list)return;
  list.innerHTML='';
  function addStatus(p,isMine){
+  var active=statusIsActive(p),payload=parseStatusPayload(p);
   var name=isMine?'حالتي':(p.display_name||p.username||'صديق');
-  var item=document.createElement('button');item.type='button';item.className='friend-status-item'+(isMine?' mine':'');
-  var avatar=p.avatar_url?'<span class="friend-status-avatar"><img src="'+safe(p.avatar_url)+'" alt=""></span>':'<span class="friend-status-avatar">'+avatarHTML(null,name)+'</span>';
-  item.innerHTML=avatar+'<strong>'+safe(name)+'</strong>';
-  item.classList.add('has-status');item.addEventListener('click',function(){showStatusViewer(isMine?user.id:p.id);});
+  var item=document.createElement('button');item.type='button';
+  item.className='friend-status-item'+(isMine?' mine':'')+(active?' has-status':'');
+  item.setAttribute('aria-label',(isMine?'فتح حالتي':'فتح حالة '+name));
+  var avatar=document.createElement('span');avatar.className='friend-status-avatar';
+  if(p.avatar_url){var img=document.createElement('img');img.src=p.avatar_url;img.alt='';avatar.appendChild(img);}
+  else{var fallback=document.createElement('span');fallback.className='status-avatar-fallback';fallback.textContent=initials(name);avatar.appendChild(fallback);}
+  if(isMine&&!active){var plus=document.createElement('span');plus.className='status-add-mark';plus.textContent='+';avatar.appendChild(plus);}
+  var title=document.createElement('strong');title.textContent=name;
+  var meta=document.createElement('small');meta.className='status-kind';
+  if(!active)meta.textContent=isMine?'أضف حالة':'';
+  else if(payload.type==='image')meta.textContent='📷 صورة';
+  else if(payload.type==='video')meta.textContent='🎬 فيديو';
+  else if(payload.type==='audio')meta.textContent='🎙 صوت';
+  else meta.textContent='نص';
+  item.appendChild(avatar);item.appendChild(title);item.appendChild(meta);
+  item.addEventListener('click',function(){if(isMine&&!active){$('quick-status-text').focus();return;}showStatusViewer(isMine?user.id:p.id);});
   list.appendChild(item);
  }
  addStatus(profileData||{},true);
@@ -209,8 +222,8 @@ async function loadFriendStatuses(conversationIds){
  if(!peerIds.length){list.insertAdjacentHTML('beforeend','<span class="status-empty">لسه مفيش حالات جديدة</span>');return;}
  var profiles=await db.from('profiles').select('id,username,display_name,avatar_url,status_text,status_media_path,status_media_kind,status_caption,status_updated_at').in('id',peerIds);
  if(profiles.error){list.insertAdjacentHTML('beforeend','<span class="status-empty">تعذر تحميل الحالات</span>');return;}
- var now=Date.now();
  var active=(profiles.data||[]).filter(function(p){return statusIsActive(p);});
+ active.sort(function(a,b){return new Date(b.status_updated_at).getTime()-new Date(a.status_updated_at).getTime();});
  if(!active.length){list.insertAdjacentHTML('beforeend','<span class="status-empty">لا توجد حالات جديدة</span>');return;}
  active.forEach(function(p){addStatus(p,false);});
 }
