@@ -170,3 +170,21 @@ body.light .profile-editor input{background:rgba(255,255,255,.82);color:#172b3d;
 .image-preview img{display:block;max-width:min(100%,1100px);max-height:100%;object-fit:contain;border-radius:12px;box-shadow:0 18px 70px #0008}
 .image-preview-close{position:absolute;top:max(14px,env(safe-area-inset-top));inset-inline-end:16px;width:42px;height:42px;border:1px solid #ffffff40;border-radius:50%;background:#ffffff18;color:#fff;font-size:30px;line-height:1;cursor:pointer}
 .sent-image:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+/* GATA v13 — separate chats home and conversation screen */
+.workspace:not(.chat-open) .conversation{display:none}
+.workspace:not(.chat-open) .sidebar{display:block;grid-column:1/-1;min-height:calc(100vh - 150px);max-height:none}
+.workspace:not(.chat-open) .conversation-list{grid-template-columns:1fr}
+.workspace.chat-open{display:block;min-height:calc(100vh - 150px)}
+.workspace.chat-open .sidebar{display:none}
+.workspace.chat-open .conversation{display:block;min-height:calc(100vh - 150px)}
+.workspace.chat-open .active-chat{min-height:calc(100vh - 150px)}
+.back-to-chats{width:40px;height:40px;flex:none;border:1px solid var(--line);border-radius:13px;background:#ffffff0a;color:var(--text);font-size:23px;display:grid;place-items:center}
+.chat-header .back-to-chats{margin-inline-end:2px}
+body.light .back-to-chats{background:rgba(255,255,255,.58);color:#29465c;border-color:rgba(91,126,151,.2)}
+@media(max-width:760px){
+ .workspace:not(.chat-open) .sidebar{min-height:calc(100vh - 145px);max-height:none}
+ .workspace.chat-open,.workspace.chat-open .conversation,.workspace.chat-open .active-chat{min-height:calc(100dvh - 125px)}
+ .workspace.chat-open .messages{max-height:none;min-height:0}
+ .workspace.chat-open .message-form{position:sticky;bottom:0}
+}
