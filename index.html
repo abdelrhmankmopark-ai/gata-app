@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1020"><meta name="description" content="جتاب - محادثاتك في مكان واحد">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
+<title>جتاب | Gata</title>
+</head>
+<body>
+<div class="bg-glow"></div>
+<main id="app" class="app-shell">
+  <section id="auth-view" class="auth-view">
+    <div class="brand-lockup"><div class="brand-mark">G</div><div><div class="brand-name">جتاب</div><div class="brand-sub">GATA · تواصل بطريقتك</div></div></div>
+    <div class="glass auth-card">
+      <div class="auth-tabs"><button class="tab active" id="show-login">تسجيل الدخول</button><button class="tab" id="show-signup">إنشاء حساب</button></div>
+      <form id="login-form" class="form">
+        <label>البريد الإلكتروني<input id="login-email" type="email" autocomplete="email" required placeholder="name@example.com"></label>
+        <label>كلمة المرور<input id="login-password" type="password" autocomplete="current-password" required placeholder="••••••••"></label>
+        <button class="primary-btn" type="submit">دخول إلى جتاب</button>
+      </form>
+      <form id="signup-form" class="form hidden">
+        <label>اسم العرض<input id="signup-name" maxlength="32" required placeholder="اسمك اللي هيظهر للناس"></label>
+        <label>اسم المستخدم<input id="signup-username" minlength="8" maxlength="24" required autocomplete="username" placeholder="مثال: gata2026"></label>
+        <small class="hint">8 أحرف على الأقل، ولازم يحتوي على رقم. من غير مسافات.</small>
+        <label>البريد الإلكتروني<input id="signup-email" type="email" autocomplete="email" required placeholder="name@example.com"></label>
+        <label>كلمة المرور<input id="signup-password" type="password" minlength="8" autocomplete="new-password" required placeholder="8 أحرف على الأقل"></label>
+        <button class="primary-btn" type="submit">إنشاء حساب مجاني</button>
+      </form>
+      <p id="auth-note" class="notice" role="status"></p>
+    </div>
+    <p class="footnote">جتاب مستقل، بتصميم وهوية خاصة به.</p>
+  </section>
+
+  <section id="chat-view" class="chat-view hidden">
+    <header class="topbar glass">
+      <div class="brand-lockup compact"><div class="brand-mark small">G</div><div><div class="brand-name">جتاب</div><div class="brand-sub">GATA</div></div></div>
+      <div class="top-actions"><button id="new-chat-btn" class="icon-btn" aria-label="محادثة جديدة" title="محادثة جديدة">＋</button><button id="settings-btn" class="icon-btn" aria-label="الإعدادات" title="الإعدادات">⚙</button><button id="logout-btn" class="icon-btn" aria-label="تسجيل الخروج" title="خروج">↪</button></div>
+    </header>
+    <div class="workspace">
+      <aside class="sidebar glass">
+        <div class="section-heading"><div><h2>المحادثات</h2><span id="my-handle" class="muted"></span></div><span class="online-dot"></span></div>
+        <div id="conversation-list" class="conversation-list"><div class="empty-state">جاري تحميل المحادثات...</div></div>
+      </aside>
+      <section class="conversation glass">
+        <div id="welcome-panel" class="welcome-panel"><div class="welcome-logo">G</div><h2>أهلاً بيك في جتاب</h2><p>ابدأ محادثة جديدة وابحث عن أصحابك باسم المستخدم.</p><button class="primary-btn" id="welcome-new-chat">ابدأ محادثة</button></div>
+        <div id="active-chat" class="active-chat hidden">
+          <header class="chat-header"><div id="chat-avatar" class="avatar">G</div><div class="chat-person"><strong id="chat-name">محادثة</strong><span id="chat-status" class="muted">غير متصل</span></div></header>
+          <div id="messages" class="messages" aria-live="polite"></div>
+          <form id="message-form" class="message-form"><input id="message-input" maxlength="4000" autocomplete="off" placeholder="اكتب رسالتك..." aria-label="اكتب رسالتك"><button type="submit" class="send-btn" aria-label="إرسال">➤</button></form>
+        </div>
+      </section>
+    </div>
+    <div id="modal" class="modal hidden"><div class="modal-card glass"><button id="close-modal" class="close-btn">×</button><h2 id="modal-title">محادثة جديدة</h2><p class="muted">اكتب اسم المستخدم للبحث عنه.</p><form id="search-form"><input id="user-search" minlength="8" placeholder="اسم المستخدم" required><button class="primary-btn" type="submit">بحث</button></form><div id="search-results"></div></div></div>
+    <div id="settings-panel" class="modal hidden"><div class="modal-card glass"><button id="close-settings" class="close-btn">×</button><h2>الإعدادات</h2><div class="setting-row"><span>اللغة</span><select id="language-select"><option value="ar">العربية</option><option value="en">English</option></select></div><div class="setting-row"><span>حسابك</span><strong id="settings-user"></strong></div><p class="muted">اللغة المختارة تُحفظ على هذا الجهاز.</p></div></div>
+  </section>
+</main>
+<div id="toast" class="toast" role="status"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js"></script>
+</body></html>
