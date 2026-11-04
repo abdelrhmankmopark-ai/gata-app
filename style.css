@@ -249,3 +249,11 @@ body.light .unread-badge{color:#073c3b}
 .conversation-side{display:flex;flex:0 0 auto;flex-direction:column;align-items:flex-end;justify-content:center;gap:7px;min-width:34px;}
 .conversation-time{font-size:10px;color:var(--muted);white-space:nowrap;direction:ltr;}
 body.light .conversation-info .conversation-preview{color:#637d8d;}
+
+
+/* GATA v20 — delete conversation action */
+.conversation-item{cursor:pointer;}
+.delete-chat-btn{flex:0 0 36px;width:36px;height:36px;display:grid;place-items:center;border:1px solid rgba(255,126,140,.22);border-radius:12px;background:rgba(255,126,140,.09);color:var(--danger);font-size:16px;opacity:.78;}
+.delete-chat-btn:hover{opacity:1;background:rgba(255,126,140,.18);transform:scale(1.04);}
+.conversation-item:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+@media(max-width:380px){.delete-chat-btn{flex-basis:32px;width:32px;height:32px;font-size:14px}}
