@@ -207,7 +207,7 @@ async function loadFriendStatuses(conversationIds){
  if(members.error){list.insertAdjacentHTML('beforeend','<span class="status-empty">تعذر تحميل الحالات</span>');return;}
  var peerIds=[...new Set((members.data||[]).map(function(m){return m.user_id;}).filter(function(id){return id&&id!==user.id;}))];
  if(!peerIds.length){list.insertAdjacentHTML('beforeend','<span class="status-empty">لسه مفيش حالات جديدة</span>');return;}
- var profiles=await db.from('profiles').select('id,username,display_name,avatar_url,status_text,status_updated_at').in('id',peerIds);
+ var profiles=await db.from('profiles').select('id,username,display_name,avatar_url,status_text,status_media_path,status_media_kind,status_caption,status_updated_at').in('id',peerIds);
  if(profiles.error){list.insertAdjacentHTML('beforeend','<span class="status-empty">تعذر تحميل الحالات</span>');return;}
  var now=Date.now();
  var active=(profiles.data||[]).filter(function(p){return statusIsActive(p);});
