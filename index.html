@@ -23,7 +23,7 @@
   });
 })();
 </script><meta name="description" content="جتا آب - محادثاتك في مكان واحد">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata32">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata33">
 <title>جتا آب | GTA App</title>
 </head>
 <body>
@@ -55,7 +55,17 @@
   <section id="chat-view" class="chat-view hidden">
     <header class="topbar glass">
       <div class="brand-lockup compact"><div class="brand-mark small">G</div><div><div class="brand-name">جتا آب</div><div class="brand-sub">GTA APP</div></div></div>
-      <div class="top-actions"><button id="theme-toggle" class="icon-btn theme-toggle" type="button" onclick="window.gataToggleTheme && window.gataToggleTheme()" aria-label="تغيير المظهر" title="تغيير المظهر">☀️</button><button id="refresh-app-btn" class="icon-btn" aria-label="تحديث التطبيق" title="تحديث التطبيق">↻</button><button id="contacts-btn" class="icon-btn" aria-label="جهات الاتصال" title="جهات الاتصال">👥</button><button id="new-chat-btn" class="icon-btn" aria-label="محادثة جديدة" title="محادثة جديدة">＋</button><button id="settings-btn" class="icon-btn" aria-label="الإعدادات" title="الإعدادات">⚙</button><button id="logout-btn" class="icon-btn" aria-label="تسجيل الخروج" title="خروج">↪</button></div>
+      <div class="top-menu-wrap">
+        <button id="top-menu-toggle" class="top-menu-toggle" type="button" aria-label="القائمة" aria-expanded="false" aria-controls="top-menu">⋮</button>
+        <div id="top-menu" class="top-menu hidden" role="menu" aria-label="القائمة الرئيسية">
+          <button id="new-chat-btn" type="button" role="menuitem"><span>＋</span> محادثة جديدة</button>
+          <button id="contacts-btn" type="button" role="menuitem"><span>👥</span> جهات الاتصال</button>
+          <button id="settings-btn" type="button" role="menuitem"><span>⚙</span> الإعدادات</button>
+          <button id="theme-toggle" type="button" role="menuitem" onclick="window.gataToggleTheme && window.gataToggleTheme()"><span>☀️</span> تغيير المظهر</button>
+          <button id="refresh-app-btn" type="button" role="menuitem"><span>↻</span> تحديث التطبيق</button>
+          <button id="logout-btn" type="button" role="menuitem"><span>↪</span> تسجيل الخروج</button>
+        </div>
+      </div>
     </header>
     <div class="workspace">
       <aside class="sidebar glass">
@@ -140,5 +150,5 @@
  </div>
 </div>
 <div id="toast" class="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata32"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata33"></script>
 </body></html>
