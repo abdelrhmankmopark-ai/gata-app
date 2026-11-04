@@ -5,7 +5,7 @@ var SUPABASE_URL='https://gncoeyferzqhyhfwwmyr.supabase.co';
 var SUPABASE_KEY='sb_publishable_N0YCbA8bfJMOZ3JVRj2TlA_iBJQrpsp';
 var db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 var user=null,currentConversation=null,currentPeer=null,channel=null,heartbeat=null,mediaRecorder=null,recordedChunks=[],profileData=null,language=localStorage.getItem('gata-language')||'ar';
-var statusViewerProfiles=[],statusViewerIndex=0,statusReplyPeer=null,statusReplyContext='';
+var statusViewerProfiles=[],statusViewerIndex=0,statusReplyPeer=null,statusReplyContext='',messageReplyDraft=null;
 function privacyPref(key,defaultValue){try{var v=localStorage.getItem('gata-privacy-'+key);return v===null?defaultValue:v==='true';}catch(e){return defaultValue;}}
 function setPrivacyPref(key,value){try{localStorage.setItem('gata-privacy-'+key,String(!!value));}catch(e){toast('تعذر حفظ الإعداد على الجهاز');}}
 function applyPrivacySettings(){if($('privacy-last-seen'))$('privacy-last-seen').checked=privacyPref('last-seen',true);if($('privacy-read-receipts'))$('privacy-read-receipts').checked=privacyPref('read-receipts',true);}
@@ -325,20 +325,35 @@ async function loadMessages(){
  if(incoming.length&&privacyPref('read-receipts',true)){var rows=incoming.map(function(id){return {message_id:id,reader_id:user.id};});await db.from('message_reads').upsert(rows,{onConflict:'message_id,reader_id',ignoreDuplicates:true});}
  box.scrollTop=box.scrollHeight;
 }
+function decodeReplyContent(value){
+ try{var raw=String(value||'');if(raw.indexOf('GATA_REPLY:')!==0)return null;var data=JSON.parse(raw.slice(11));return data&&typeof data==='object'?data:null;}catch(e){return null;}
+}
+function messagePreview(m){
+ var media=isMedia(m.content);if(media)return media.kind==='image'?'📷 صورة':media.kind==='audio'?'🎙 رسالة صوتية':'📎 مرفق';
+ var reply=decodeReplyContent(m.content);return reply?String(reply.text||''):String(m.content||'');
+}
+function setMessageReply(m){
+ messageReplyDraft={id:m.id,sender:m.sender_id,text:messagePreview(m).slice(0,180)};
+ var bar=$('reply-compose-bar');if(!bar)return;
+ $('reply-compose-name').textContent=m.sender_id===user.id?'أنت':'الطرف الآخر';
+ $('reply-compose-text').textContent=messageReplyDraft.text||'رسالة';
+ bar.classList.remove('hidden');$('message-input').focus();
+}
+function clearMessageReply(){messageReplyDraft=null;var bar=$('reply-compose-bar');if(bar)bar.classList.add('hidden');}
 async function renderMessage(m){
  var box=$('messages'),div=document.createElement('div');div.className='bubble'+(m.sender_id===user.id?' mine':'');div.dataset.id=m.id;box.appendChild(div);
- var body=document.createElement('div'),media=isMedia(m.content);
- if(media){try{var url=await mediaUrl(media.path);if(media.kind==='image'){var im=document.createElement('img');im.src=url;im.alt='صورة مرسلة';im.className='sent-image';im.loading='lazy';im.addEventListener('click',function(){openImagePreview(url);});im.setAttribute('role','button');im.setAttribute('tabindex','0');im.setAttribute('aria-label','فتح الصورة بحجم أكبر');im.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openImagePreview(url);}});body.appendChild(im);}else{var au=document.createElement('audio');au.controls=true;au.preload='metadata';au.src=url;au.className='sent-audio';body.appendChild(au);}}catch(err){body.textContent='تعذر تحميل المرفق';}}
- else body.textContent=m.content;
+ var body=document.createElement('div'),replyData=decodeReplyContent(m.content),plainContent=replyData?String(replyData.text||''):m.content,media=isMedia(m.content);
+ if(replyData){var quote=document.createElement('div');quote.className='message-quote';quote.textContent='↩ '+(replyData.sender===user.id?'أنت':'رد على رسالة')+' · '+String(replyData.quote||'رسالة');body.appendChild(quote);var replyText=document.createElement('div');replyText.className='message-reply-text';replyText.textContent=plainContent;body.appendChild(replyText);}else if(media){try{var url=await mediaUrl(media.path);if(media.kind==='image'){var im=document.createElement('img');im.src=url;im.alt='صورة مرسلة';im.className='sent-image';im.loading='lazy';im.addEventListener('click',function(){openImagePreview(url);});im.setAttribute('role','button');im.setAttribute('tabindex','0');im.setAttribute('aria-label','فتح الصورة بحجم أكبر');im.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openImagePreview(url);}});body.appendChild(im);}else{var au=document.createElement('audio');au.controls=true;au.preload='metadata';au.src=url;au.className='sent-audio';body.appendChild(au);}}catch(err){body.textContent='تعذر تحميل المرفق';}}
+ else if(!replyData)body.textContent=m.content;
  var meta=document.createElement('div');meta.className='bubble-meta';var time=document.createElement('span');time.textContent=dateLabel(m.created_at);meta.appendChild(time);
  if(m.sender_id===user.id&&privacyPref('read-receipts',true)){var read=await db.from('message_reads').select('message_id').eq('message_id',m.id).neq('reader_id',user.id);var rs=document.createElement('span');rs.className='read-state';rs.textContent=read.data&&read.data.length?'✓✓':'✓';meta.appendChild(rs);}
- if(!media){var copy=document.createElement('button');copy.className='message-delete';copy.type='button';copy.textContent='نسخ';copy.title='نسخ الرسالة';copy.addEventListener('click',async function(){try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(String(m.content||''));}else{var ta=document.createElement('textarea');ta.value=String(m.content||'');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}toast('تم نسخ الرسالة');}catch(err){toast('تعذر نسخ الرسالة');}});meta.appendChild(copy);if(m.sender_id===user.id){var edit=document.createElement('button');edit.className='message-delete';edit.type='button';edit.textContent='تعديل';edit.title='تعديل الرسالة';edit.addEventListener('click',async function(){var next=prompt('عدّل نص الرسالة:',String(m.content||''));if(next===null)return;next=next.trim();if(!next){toast('الرسالة لا يمكن أن تكون فارغة');return;}if(next.length>4000){toast('الرسالة أطول من المسموح');return;}var upd=await db.from('messages').update({content:next}).eq('id',m.id).eq('sender_id',user.id).select().single();if(upd.error){toast('تعذر تعديل الرسالة: '+upd.error.message);return;}m.content=next;body.textContent=next;toast('تم تعديل الرسالة');});meta.appendChild(edit);}}var del=document.createElement('button');del.className='message-delete';del.type='button';del.textContent='حذف';del.title='حذف للطرفين';del.addEventListener('click',async function(){if(!confirm('حذف الرسالة من عندك وعند الطرف الآخر؟'))return;var d=await db.from('messages').delete().eq('id',m.id);if(d.error)toast('تعذر حذف الرسالة: '+d.error.message);});meta.appendChild(del);div.appendChild(body);div.appendChild(meta);
+ if(!media){var copy=document.createElement('button');copy.className='message-delete';copy.type='button';copy.textContent='نسخ';copy.title='نسخ الرسالة';copy.addEventListener('click',async function(){try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(replyData?plainContent:String(m.content||''));}else{var ta=document.createElement('textarea');ta.value=String(m.content||'');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}toast('تم نسخ الرسالة');}catch(err){toast('تعذر نسخ الرسالة');}});meta.appendChild(copy);if(m.sender_id===user.id&&!replyData){var edit=document.createElement('button');edit.className='message-delete';edit.type='button';edit.textContent='تعديل';edit.title='تعديل الرسالة';edit.addEventListener('click',async function(){var next=prompt('عدّل نص الرسالة:',String(m.content||''));if(next===null)return;next=next.trim();if(!next){toast('الرسالة لا يمكن أن تكون فارغة');return;}if(next.length>4000){toast('الرسالة أطول من المسموح');return;}var upd=await db.from('messages').update({content:next}).eq('id',m.id).eq('sender_id',user.id).select().single();if(upd.error){toast('تعذر تعديل الرسالة: '+upd.error.message);return;}m.content=next;body.textContent=next;toast('تم تعديل الرسالة');});meta.appendChild(edit);}}var replyBtn=document.createElement('button');replyBtn.className='message-delete';replyBtn.type='button';replyBtn.textContent='رد';replyBtn.title='الرد على الرسالة';replyBtn.addEventListener('click',function(){setMessageReply(m);});meta.appendChild(replyBtn);var del=document.createElement('button');del.className='message-delete';del.type='button';del.textContent='حذف';del.title='حذف للطرفين';del.addEventListener('click',async function(){if(!confirm('حذف الرسالة من عندك وعند الطرف الآخر؟'))return;var d=await db.from('messages').delete().eq('id',m.id);if(d.error)toast('تعذر حذف الرسالة: '+d.error.message);});meta.appendChild(del);div.appendChild(body);div.appendChild(meta);
 }
 async function sendMessage(e){
- e.preventDefault();var input=$('message-input'),content=input.value.trim();if(!content||!currentConversation)return;
+ e.preventDefault();var input=$('message-input'),textContent=input.value.trim();if(!textContent||!currentConversation)return;var content=messageReplyDraft?'GATA_REPLY:'+JSON.stringify({replyTo:messageReplyDraft.id,sender:messageReplyDraft.sender,quote:messageReplyDraft.text,text:textContent}):textContent;
  input.value='';var r=await db.from('messages').insert({conversation_id:currentConversation,sender_id:user.id,content:content}).select().single();
- if(r.error){toast('تعذر إرسال الرسالة: '+r.error.message);input.value=content;return;}
- await renderMessage(r.data);$('messages').scrollTop=$('messages').scrollHeight;
+ if(r.error){toast('تعذر إرسال الرسالة: '+r.error.message);input.value=textContent;return;}
+ clearMessageReply();await renderMessage(r.data);$('messages').scrollTop=$('messages').scrollHeight;
 }
 function subscribeGlobal(){
  if(channel)db.removeChannel(channel);
@@ -447,7 +462,7 @@ function initEvents(){
  $('show-login').onclick=function(){showAuth('login');};$('show-signup').onclick=function(){showAuth('signup');};
  $('top-menu-toggle').onclick=function(ev){ev.stopPropagation();var menu=$('top-menu'),open=menu.classList.toggle('hidden')===false;this.setAttribute('aria-expanded',open?'true':'false');};document.addEventListener('click',function(ev){if(!ev.target.closest('.top-menu-wrap'))closeTopMenu();});
  $('theme-toggle').onclick=toggleTheme;$('theme-toggle-auth').onclick=toggleTheme;
- $('login-form').addEventListener('submit',login);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);
+ $('login-form').addEventListener('submit',login);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);$('cancel-message-reply').onclick=clearMessageReply;
  $('back-to-chats').onclick=function(){if(location.hash==='#chat'&&history.state&&history.state.gataChat){history.back();}else{showChats();}};
  window.addEventListener('popstate',function(){showChats();});
  $('chat-search').addEventListener('input',filterConversations);
