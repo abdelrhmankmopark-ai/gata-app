@@ -379,3 +379,28 @@ body.light .settings-screen{background:#f5f7f8}body.light .settings-profile{back
 .updates-panel .friend-status-item{flex-basis:76px;width:76px}
 .updates-panel .friend-status-avatar{width:68px;height:68px}
 .updates-panel .friend-status-item strong{max-width:76px;font-size:11px}
+
+
+/* GTA v36 — WhatsApp-style multimedia status composer and viewer */
+.status-composer{padding:15px;border-radius:18px;margin:0 0 22px;display:grid;gap:11px}
+.status-composer-title{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.status-composer-title strong{font-size:14px}.status-composer-title span,.status-compose-note{font-size:11px;color:var(--muted)}
+.status-composer textarea{width:100%;resize:vertical;min-height:62px;border:1px solid var(--line);border-radius:13px;padding:11px;background:var(--panel);color:var(--text);font:inherit;outline:none}
+.status-compose-actions{display:flex;gap:8px;flex-wrap:wrap}
+.status-compose-actions button{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:9px 12px;font:inherit;font-size:12px;font-weight:750}
+.status-compose-actions .primary-btn{background:var(--accent);color:white;border:0}
+.status-compose-actions button:disabled{opacity:.55}
+.friend-status-item{position:relative}
+.friend-status-item .status-kind{font-size:9px;color:var(--muted);font-weight:600}
+.friend-status-item.has-status .friend-status-avatar{border-color:var(--accent)}
+.status-viewer{position:fixed;inset:0;z-index:1000;background:#050914f2;display:grid;place-items:center;padding:18px}
+.status-viewer.hidden{display:none!important}
+.status-viewer-close{position:absolute;top:calc(env(safe-area-inset-top) + 14px);left:16px;width:42px;height:42px;border:0;border-radius:50%;background:#ffffff20;color:white;font-size:28px}
+.status-viewer-card{width:min(520px,100%);min-height:55vh;max-height:88vh;display:flex;flex-direction:column;gap:15px;color:white}
+.status-viewer-owner{font-size:14px;font-weight:800;padding:8px 0}
+.status-viewer-content{flex:1;min-height:280px;display:grid;place-items:center;background:#111827;border-radius:18px;overflow:hidden;padding:12px}
+.status-viewer-content img,.status-viewer-content video{display:block;max-width:100%;max-height:65vh;object-fit:contain;border-radius:12px}
+.status-viewer-content audio{width:100%}
+.status-viewer-text{font-size:clamp(22px,6vw,34px);font-weight:850;text-align:center;white-space:pre-wrap;overflow-wrap:anywhere;padding:28px}
+.status-viewer-time{font-size:11px;color:#cbd5e1;text-align:center}
+.status-viewer .danger-action{align-self:center;max-width:220px}
