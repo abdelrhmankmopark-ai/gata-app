@@ -23,7 +23,7 @@
   });
 })();
 </script><meta name="description" content="جتا آب - محادثاتك في مكان واحد">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata22">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata23">
 <title>جتا آب | GTA App</title>
 </head>
 <body>
@@ -73,9 +73,28 @@
     </div>
     <div id="modal" class="modal hidden"><div class="modal-card glass"><button id="close-modal" class="close-btn">×</button><h2 id="modal-title">محادثة جديدة</h2><p id="modal-hint" class="muted">اكتب اسم المستخدم للبحث عنه.</p><form id="search-form"><input id="user-search" minlength="8" placeholder="اسم المستخدم" required><button class="primary-btn" type="submit">بحث</button></form><div id="search-results"></div></div></div>
     <div id="image-preview" class="image-preview hidden" role="dialog" aria-modal="true" aria-label="معاينة الصورة"><button id="close-image-preview" class="image-preview-close" type="button" aria-label="إغلاق">×</button><img id="image-preview-content" alt="معاينة الصورة المرسلة"></div>
-    <div id="settings-panel" class="modal hidden"><div class="modal-card glass"><button id="close-settings" class="close-btn">×</button><h2>الإعدادات</h2><div class="profile-editor"><div class="profile-editor-title">الملف الشخصي</div><label for="profile-display-name">اسم العرض</label><input id="profile-display-name" maxlength="32" placeholder="اكتب اسمك الظاهر"><button id="save-profile-btn" class="primary-btn" type="button">حفظ التغييرات</button></div><div class="setting-row"><span>اللغة</span><select id="language-select"><option value="ar">العربية</option><option value="en">English</option></select></div><div class="setting-row"><span>حسابك</span><strong id="settings-user"></strong></div><div class="setting-row"><span>الصورة الشخصية</span><button id="change-avatar-btn" class="primary-btn" type="button">تغيير الصورة</button><input id="avatar-file-input" type="file" accept="image/jpeg,image/png,image/webp" class="file-picker"></div></div></div>
+    <div id="settings-panel" class="settings-screen hidden" role="dialog" aria-modal="true" aria-label="إعدادات الحساب">
+ <header class="settings-top"><button id="close-settings" class="settings-back" type="button" aria-label="رجوع">→</button><strong>الإعدادات</strong><span class="settings-top-spacer"></span></header>
+ <div class="settings-profile">
+  <div class="settings-cover"></div>
+  <button id="change-avatar-btn" class="settings-avatar-button" type="button" aria-label="تغيير الصورة الشخصية"><div id="settings-avatar" class="settings-avatar">G</div><span class="avatar-camera">＋</span></button>
+  <div id="settings-display-name" class="settings-profile-name">حسابك على جتا آب</div>
+  <div id="settings-user" class="settings-profile-handle">@username</div>
+  <input id="avatar-file-input" type="file" accept="image/jpeg,image/png,image/webp" class="file-picker">
+ </div>
+ <div class="settings-menu">
+  <button class="settings-item" id="settings-account-row" type="button"><span class="settings-item-icon">♙</span><span class="settings-item-copy"><strong>الحساب</strong><small>تعديل اسم العرض وبيانات حسابك</small></span><span class="settings-chevron">‹</span></button>
+  <div id="profile-editor" class="profile-editor settings-editor hidden"><label for="profile-display-name">اسم العرض</label><input id="profile-display-name" maxlength="32" placeholder="اكتب اسمك الظاهر"><button id="save-profile-btn" class="primary-btn" type="button">حفظ التغييرات</button></div>
+  <div class="settings-item settings-item-static"><span class="settings-item-icon">🔒</span><span class="settings-item-copy"><strong>الخصوصية</strong><small>إعدادات الخصوصية والأمان</small></span><span class="settings-soon">قريبًا</span></div>
+  <button class="settings-item" id="settings-language-row" type="button"><span class="settings-item-icon">🌐</span><span class="settings-item-copy"><strong>لغة التطبيق</strong><small>اختار اللغة المناسبة</small></span><span class="settings-inline-control"><select id="language-select"><option value="ar">العربية</option><option value="en">English</option></select></span></button>
+  <div class="settings-item settings-item-static"><span class="settings-item-icon">🔔</span><span class="settings-item-copy"><strong>الإشعارات</strong><small>تنبيهات الرسائل الجديدة</small></span><span class="settings-soon">قريبًا</span></div>
+  <div class="settings-item settings-item-static"><span class="settings-item-icon">▣</span><span class="settings-item-copy"><strong>التخزين والبيانات</strong><small>إدارة الصور والملفات</small></span><span class="settings-soon">قريبًا</span></div>
+  <div class="settings-item settings-item-static"><span class="settings-item-icon">◷</span><span class="settings-item-copy"><strong>المساعدة والملاحظات</strong><small>معلومات ومساعدة استخدام جتا آب</small></span><span class="settings-soon">قريبًا</span></div>
+  <div class="settings-item settings-item-static"><span class="settings-item-icon">ⓘ</span><span class="settings-item-copy"><strong>عن التطبيق</strong><small>جتا آب · GTA App</small></span><span class="settings-chevron">›</span></div>
+ </div>
+</div>
   </section>
 </main>
 <div id="toast" class="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata22"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata23"></script>
 </body></html>
