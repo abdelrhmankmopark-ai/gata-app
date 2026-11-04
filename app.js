@@ -77,7 +77,7 @@ async function renderMessage(m){
  var box=$('messages');var div=document.createElement('div');div.className='bubble'+(m.sender_id===user.id?' mine':'');div.dataset.id=m.id;
  var meta='<div class="bubble-meta"><span>'+safe(dateLabel(m.created_at))+'</span>';
  if(m.sender_id===user.id){var read=await db.from('message_reads').select('message_id').eq('message_id',m.id).neq('reader_id',user.id);meta+='<span class="read-state">'+(read.data&&read.data.length?'✓✓':'✓')+'</span>';}
- meta+='</div>';div.innerHTML='<div>'+safe(m.content)+'</div>'+meta;box.appendChild(div);
+ meta+='<button class="message-delete" type="button" title="حذف للطرفين" aria-label="حذف الرسالة">حذف</button></div>';div.innerHTML='<div>'+safe(m.content)+'</div>'+meta;div.querySelector('.message-delete').addEventListener('click',async function(){if(!confirm('حذف الرسالة من عندك وعند الطرف الآخر؟'))return;var d=await db.from('messages').delete().eq('id',m.id);if(d.error)toast('تعذر حذف الرسالة: '+d.error.message);});box.appendChild(div);
 }
 async function sendMessage(e){
  e.preventDefault();var input=$('message-input'),content=input.value.trim();if(!content||!currentConversation)return;
@@ -97,7 +97,7 @@ function startHeartbeat(){if(heartbeat)clearInterval(heartbeat);heartbeat=setInt
 function openModal(){$('modal').classList.remove('hidden');$('user-search').value='';$('search-results').innerHTML='';$('user-search').focus();}
 async function searchUsers(e){
  e.preventDefault();var term=$('user-search').value.trim().replace(/^@/,'').toLowerCase();if(term.length<8){toast('اسم المستخدم لازم يكون 8 أحرف على الأقل');return;}
- var r=await db.from('profiles').select('id,username,display_name').ilike('username',term).neq('id',user.id).limit(10);
+ var r=await db.from('profiles').select('id,username,display_name').eq('username',term).neq('id',user.id).limit(10);
  var box=$('search-results');box.innerHTML='';
  if(r.error){box.textContent='تعذر البحث: '+r.error.message;return;}
  if(!r.data.length){box.textContent=tr('noResults');return;}
