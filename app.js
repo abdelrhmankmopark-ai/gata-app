@@ -352,26 +352,14 @@ async function searchUsers(e){
 }
 async function startDirectChat(peer){
  if(!user||!peer||!peer.id||peer.id===user.id){toast('اختار حسابًا صحيحًا لبدء المحادثة');return;}
- var ids=[user.id,peer.id].sort(),key=ids.join(':');
- var existing=await db.from('conversations').select('id').eq('direct_key',key).maybeSingle();
- if(existing.error){toast('تعذر البحث عن محادثة سابقة: '+existing.error.message);return;}
- var cid=existing.data&&existing.data.id;
- if(!cid){
-  var created=await db.from('conversations').insert({created_by:user.id,direct_key:key,is_group:false}).select('id').single();
-  if(created.error){
-   var retry=await db.from('conversations').select('id').eq('direct_key',key).maybeSingle();
-   if(retry.error||!retry.data){toast('تعذر إنشاء المحادثة: '+created.error.message);return;}
-   cid=retry.data.id;
-  }else cid=created.data.id;
- }
- for(var memberId of ids){
-  var added=await db.from('conversation_members').upsert(
-   {conversation_id:cid,user_id:memberId},
-   {onConflict:'conversation_id,user_id',ignoreDuplicates:true}
-  );
-  if(added.error){toast('تعذر إضافة عضو للمحادثة ('+(memberId===user.id?'حسابك':'صاحبك')+'): '+added.error.message);return;}
- }
- $('modal').classList.add('hidden');await openConversation(cid,peer.id,peer.display_name||peer.username);toast('المحادثة جاهزة');
+ toast('جاري تجهيز المحادثة...');
+ var result=await db.rpc('get_or_create_direct_conversation',{p_peer_id:peer.id});
+ if(result.error){toast('تعذر إنشاء المحادثة: '+result.error.message);return;}
+ var cid=result.data;
+ if(!cid){toast('تعذر إنشاء المحادثة: قاعدة البيانات لم تُرجع رقم المحادثة');return;}
+ $('modal').classList.add('hidden');
+ await openConversation(cid,peer.id,peer.display_name||peer.username);
+ toast('المحادثة جاهزة');
 }
 async function login(e){e.preventDefault();note('جاري تسجيل الدخول...');var r=await db.auth.signInWithPassword({email:$('login-email').value.trim(),password:$('login-password').value});if(r.error){note('تعذر تسجيل الدخول: '+r.error.message);return;}user=r.data.user;try{await enterApp();}catch(err){note('تم تسجيل الدخول لكن تعذر تحميل الحساب: '+err.message);}}
 async function signup(e){
