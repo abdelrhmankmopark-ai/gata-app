@@ -24,9 +24,11 @@ function applyTheme(){
  if(meta)meta.setAttribute('content',light?'#edf4f8':'#0a1020');
 }
 function toggleTheme(){
- localStorage.setItem('gata-theme',document.body.classList.contains('light')?'dark':'light');
+ var next=document.body.classList.contains('light')?'dark':'light';
+ try{localStorage.setItem('gata-theme',next);}catch(e){}
  applyTheme();
 }
+window.gataToggleTheme=toggleTheme;
 
 function safe(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function initials(s){var a=String(s||'G').trim().split(/\s+/);return (a[0][0]||'G').toUpperCase();}
