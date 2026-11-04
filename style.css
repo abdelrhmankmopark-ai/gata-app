@@ -199,3 +199,12 @@ body.light .back-to-chats{background:rgba(255,255,255,.58);color:#29465c;border-
 .workspace.chat-open .active-chat{display:flex;flex-direction:column;min-height:calc(100dvh - 150px)!important;height:calc(100dvh - 150px)}
 .workspace.chat-open .messages{flex:1;min-height:0;max-height:none!important;overflow-y:auto}
 @media(max-width:760px){.workspace:not(.chat-open)>.sidebar{min-height:calc(100dvh - 130px)!important}.workspace.chat-open,.workspace.chat-open>.conversation,.workspace.chat-open .active-chat{min-height:calc(100dvh - 130px)!important;height:calc(100dvh - 130px)}.workspace.chat-open .message-form{flex:none}}
+
+
+/* GATA v15 — keep profile avatar inside the chat header */
+.chat-header{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden}
+.chat-header>.avatar{width:44px!important;height:44px!important;min-width:44px!important;max-width:44px!important;min-height:44px!important;max-height:44px!important;flex:0 0 44px!important;overflow:hidden;border-radius:50%;}
+.chat-header>.avatar img,.chat-header>.avatar .avatar-image{display:block;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:cover;border-radius:inherit}
+.chat-header .chat-person{flex:1 1 auto;min-width:0;max-width:calc(100% - 105px);overflow:hidden}
+.chat-header .chat-person strong,.chat-header .chat-person span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-header .back-to-chats{flex:0 0 40px}
