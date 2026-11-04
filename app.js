@@ -365,12 +365,11 @@ async function startDirectChat(peer){
   }else cid=created.data.id;
  }
  for(var memberId of ids){
-  var check=await db.from('conversation_members').select('user_id').eq('conversation_id',cid).eq('user_id',memberId).maybeSingle();
-  if(check.error){toast('تعذر التحقق من أعضاء المحادثة: '+check.error.message);return;}
-  if(!check.data){
-   var added=await db.from('conversation_members').insert({conversation_id:cid,user_id:memberId});
-   if(added.error){toast('تعذر إضافة عضو للمحادثة ('+(memberId===user.id?'حسابك':'صاحبك')+'): '+added.error.message);return;}
-  }
+  var added=await db.from('conversation_members').upsert(
+   {conversation_id:cid,user_id:memberId},
+   {onConflict:'conversation_id,user_id',ignoreDuplicates:true}
+  );
+  if(added.error){toast('تعذر إضافة عضو للمحادثة ('+(memberId===user.id?'حسابك':'صاحبك')+'): '+added.error.message);return;}
  }
  $('modal').classList.add('hidden');await openConversation(cid,peer.id,peer.display_name||peer.username);toast('المحادثة جاهزة');
 }
