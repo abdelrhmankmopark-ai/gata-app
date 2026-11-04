@@ -5,7 +5,7 @@ var SUPABASE_URL='https://gncoeyferzqhyhfwwmyr.supabase.co';
 var SUPABASE_KEY='sb_publishable_N0YCbA8bfJMOZ3JVRj2TlA_iBJQrpsp';
 var db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 var user=null,currentConversation=null,currentPeer=null,channel=null,heartbeat=null,mediaRecorder=null,recordedChunks=[],profileData=null,language=localStorage.getItem('gata-language')||'ar';
-var statusViewerProfiles=[],statusViewerIndex=0;
+var statusViewerProfiles=[],statusViewerIndex=0,statusReplyPeer=null,statusReplyContext='';
 function privacyPref(key,defaultValue){try{var v=localStorage.getItem('gata-privacy-'+key);return v===null?defaultValue:v==='true';}catch(e){return defaultValue;}}
 function setPrivacyPref(key,value){try{localStorage.setItem('gata-privacy-'+key,String(!!value));}catch(e){toast('تعذر حفظ الإعداد على الجهاز');}}
 function applyPrivacySettings(){if($('privacy-last-seen'))$('privacy-last-seen').checked=privacyPref('last-seen',true);if($('privacy-read-receipts'))$('privacy-read-receipts').checked=privacyPref('read-receipts',true);}
@@ -132,6 +132,15 @@ async function showStatusViewer(profileId){
   }catch(err){content.textContent='تعذر تحميل الملف. تأكد من اتصال الإنترنت.';}
  }
  if(profileId===user.id)del.classList.remove('hidden');
+ var reply=$('reply-status-btn');
+ if(reply){reply.classList.toggle('hidden',profileId===user.id);statusReplyPeer=profileId===user.id?null:{id:data.id,username:data.username,display_name:data.display_name};statusReplyContext=payload.text||({image:'صورة',video:'فيديو',audio:'رسالة صوتية'}[payload.type]||'حالة');}
+}
+async function replyToStatus(){
+ if(!statusReplyPeer||!user)return;
+ var peer=statusReplyPeer,context=statusReplyContext;
+ closeStatusViewer();
+ await startDirectChat(peer);
+ if(currentPeer===peer.id){var input=$('message-input');input.value='رد على حالتك ('+context+'): ';input.focus();}
 }
 async function saveStatusValue(value){
  var now=new Date().toISOString();
@@ -459,6 +468,7 @@ function initEvents(){
  $('status-viewer-next').onclick=function(){if(statusViewerIndex<statusViewerProfiles.length-1)showStatusViewer(statusViewerProfiles[statusViewerIndex+1].id);};
  $('status-viewer').onclick=function(ev){if(ev.target===$('status-viewer'))closeStatusViewer();};
  $('delete-my-status').onclick=deleteMyStatus;
+ $('reply-status-btn').onclick=replyToStatus;
 
  $('attach-image-btn').onclick=function(){openFilePicker($('image-file-input'));};
  $('image-file-input').onchange=function(){if(this.files&&this.files[0])uploadMedia(this.files[0],'image');this.value='';};
