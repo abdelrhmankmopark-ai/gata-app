@@ -44,9 +44,24 @@ async function uploadMedia(file,kind){
  var payload={kind:kind,path:path,name:file.name||('voice.'+ext),mime:file.type};
  var ins=await db.from('messages').insert({conversation_id:currentConversation,sender_id:user.id,content:'GATA_MEDIA:'+JSON.stringify(payload)}).select().single();
  if(ins.error){await db.storage.from('gata-media').remove([path]);toast('تعذر إرسال الملف: '+ins.error.message);return;}
- await renderMessage(ins.data);$('messages').scrollTop=$('messages').scrollHeight;
+ await renderMessage(ins.data);sendPushNotification(ins.data.id);$('messages').scrollTop=$('messages').scrollHeight;
 }
-async function enableNotifications(){if(!('Notification' in window)){toast('المتصفح لا يدعم الإشعارات');return;}var p=await Notification.requestPermission();toast(p==='granted'?'تم تفعيل الإشعارات أثناء فتح التطبيق':'لم يتم السماح بالإشعارات');}
+function urlBase64ToUint8Array(base64String){var padding='='.repeat((4-base64String.length%4)%4);var base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');var raw=atob(base64);var output=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)output[i]=raw.charCodeAt(i);return output;}
+async function savePushSubscription(subscription){var r=await db.functions.invoke('gata-push',{body:{action:'subscribe',subscription:subscription.toJSON()}});if(r.error)throw r.error;return r.data;}
+async function sendPushNotification(messageId){try{var r=await db.functions.invoke('gata-push',{body:{action:'notify',conversation_id:currentConversation,message_id:messageId}});if(r.error)console.warn('Push notification:',r.error.message);}catch(err){console.warn('Push notification unavailable:',err);}}
+async function enableNotifications(){
+ if(!('Notification' in window)){toast('المتصفح لا يدعم الإشعارات');return;}
+ if(!('serviceWorker' in navigator)||!('PushManager' in window)){toast('الإشعارات الفورية غير مدعومة في هذا المتصفح');return;}
+ var permission=await Notification.requestPermission();
+ if(permission!=='granted'){toast('لم يتم السماح بالإشعارات');return;}
+ try{
+  var registration=await navigator.serviceWorker.ready;
+  var subscription=await registration.pushManager.getSubscription();
+  if(!subscription){subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array('BI8ChmtEYvxsG5ydvWefV6vrAS64S1idBLTDZfKa83efDomSGW7J0xQkagKQPSPhBIWLJDK5KI5bH3Q7wuSEN78')});}
+  await savePushSubscription(subscription);
+  toast('تم تفعيل إشعارات جتاب حتى عند إغلاق التطبيق');
+ }catch(err){console.error(err);toast('تعذر تفعيل الإشعارات: '+(err.message||'حاول مرة أخرى'));}
+}
 function dateLabel(s){return new Date(s).toLocaleTimeString(language==='ar'?'ar-EG':'en-US',{hour:'2-digit',minute:'2-digit'});}
 function showAuth(tab){$('auth-view').classList.remove('hidden');$('chat-view').classList.add('hidden');$('login-form').classList.toggle('hidden',tab==='signup');$('signup-form').classList.toggle('hidden',tab!=='signup');$('show-login').classList.toggle('active',tab!=='signup');$('show-signup').classList.toggle('active',tab==='signup');note('');}
 function applyLanguage(){document.documentElement.lang=language;document.documentElement.dir=language==='ar'?'rtl':'ltr';document.body.dir=document.documentElement.dir;$('message-input').placeholder=tr('write');$('settings-title');$('language-select').value=language;var labels=document.querySelectorAll('[data-i18n]');labels.forEach(function(el){el.textContent=tr(el.dataset.i18n);});}
@@ -118,12 +133,12 @@ async function sendMessage(e){
  e.preventDefault();var input=$('message-input'),content=input.value.trim();if(!content||!currentConversation)return;
  input.value='';var r=await db.from('messages').insert({conversation_id:currentConversation,sender_id:user.id,content:content}).select().single();
  if(r.error){toast('تعذر إرسال الرسالة: '+r.error.message);input.value=content;return;}
- await renderMessage(r.data);$('messages').scrollTop=$('messages').scrollHeight;
+ await renderMessage(r.data);sendPushNotification(r.data.id);$('messages').scrollTop=$('messages').scrollHeight;
 }
 function subscribeGlobal(){
  if(channel)db.removeChannel(channel);
  channel=db.channel('gata-live-'+user.id)
- .on('postgres_changes',{event:'*',schema:'public',table:'messages'},function(payload){var m=payload.new||payload.old;if(currentConversation&&m.conversation_id===currentConversation){if(payload.eventType==='INSERT'&&m.sender_id!==user.id){renderMessage(m);db.from('message_reads').upsert({message_id:m.id,reader_id:user.id},{onConflict:'message_id,reader_id',ignoreDuplicates:true});$('messages').scrollTop=$('messages').scrollHeight;if(document.hidden&&'Notification' in window&&Notification.permission==='granted'){new Notification('رسالة جديدة على جتاب',{body:'وصلك رسالة جديدة',icon:'./icon.svg'});}}else if(payload.eventType==='DELETE'){var el=document.querySelector('[data-id="'+m.id+'"]');if(el)el.remove();}}loadConversations();})
+ .on('postgres_changes',{event:'*',schema:'public',table:'messages'},function(payload){var m=payload.new||payload.old;if(currentConversation&&m.conversation_id===currentConversation){if(payload.eventType==='INSERT'&&m.sender_id!==user.id){renderMessage(m);db.from('message_reads').upsert({message_id:m.id,reader_id:user.id},{onConflict:'message_id,reader_id',ignoreDuplicates:true});$('messages').scrollTop=$('messages').scrollHeight;}else if(payload.eventType==='DELETE'){var el=document.querySelector('[data-id="'+m.id+'"]');if(el)el.remove();}}loadConversations();})
  .on('postgres_changes',{event:'*',schema:'public',table:'message_reads'},function(payload){var m=payload.new||payload.old;var el=document.querySelector('[data-id="'+m.message_id+'"] .read-state');if(el)el.textContent='✓✓';})
  .on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},function(){refreshPeerStatus();})
  .subscribe();
