@@ -315,3 +315,6 @@ body.light .settings-screen{background:#f5f7f8}body.light .settings-profile{back
 
 /* Gata v29 — make profile header interactive */
 #chat-avatar,#chat-person{cursor:pointer}#chat-person:focus-visible{outline:2px solid var(--accent);outline-offset:5px;border-radius:8px}
+
+/* Gata v30 — editable personal bio */
+#profile-bio-input{width:100%;box-sizing:border-box;resize:vertical;min-height:76px;border:1px solid var(--line);border-radius:12px;padding:11px;background:var(--input-bg,var(--panel));color:var(--text);font:inherit;font-size:13px;outline:none}#profile-bio-input:focus{border-color:var(--accent)}.bio-counter{display:block;text-align:left;color:var(--muted);font-size:10px;margin:4px 3px 10px}.public-profile-bio{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8!important;padding:12px 14px;margin:14px 0!important;border:1px solid var(--line);border-radius:13px;background:#ffffff08;color:var(--text)!important;min-height:20px}
