@@ -17,7 +17,19 @@ function safe(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&'
 function initials(s){var a=String(s||'G').trim().split(/\s+/);return (a[0][0]||'G').toUpperCase();}
 function setAvatar(el,url){if(!el)return;if(url)el.innerHTML='<img class="avatar-image" src="'+safe(url)+'" alt="">';else el.textContent='G';}
 function avatarHTML(url,name){return url?'<div class="avatar"><img class="avatar-image" src="'+safe(url)+'" alt=""></div>':'<div class="avatar">'+safe(initials(name))+'</div>';}
-function isMedia(content){try{return content.indexOf('GATA_MEDIA:')===0?JSON.parse(content.slice(11)):null;}catch(e){return null;}}
+function isMedia(content){
+ try{
+  if(content&&typeof content==='object')return content.kind&&content.path?content:null;
+  var raw=String(content||'').trim();
+  var marker=raw.indexOf('GATA_MEDIA:');
+  if(marker>=0)raw=raw.slice(marker+11).trim();
+  if(raw.charAt(0)==='{'){
+   var data=JSON.parse(raw);
+   if(data&&data.path&&(data.kind==='image'||data.kind==='audio'))return data;
+  }
+ }catch(e){}
+ return null;
+}
 async function mediaUrl(path){var r=await db.storage.from('gata-media').createSignedUrl(path,3600);if(r.error)throw r.error;return r.data.signedUrl;}
 async function uploadMedia(file,kind){
  if(!currentConversation||!file)return;
