@@ -437,3 +437,7 @@ body.light .updates-panel .friend-status-avatar{box-shadow:0 7px 18px rgba(62,11
 .status-viewer-nav.prev{left:8px}.status-viewer-nav.next{right:8px}.status-viewer-nav:disabled{opacity:.18;pointer-events:none}
 .status-viewer-card{padding-top:18px}
 @media(max-width:600px){.status-viewer{padding:12px}.status-viewer-card{width:100%;min-height:65vh;max-height:86vh}.status-viewer-content{min-height:48vh}.status-viewer-nav{width:34px;height:58px;background:#0005}}
+
+
+/* GATA v44 — reply to a friend's status */
+.status-reply-btn{align-self:center;min-width:190px;margin:2px auto 8px;padding:11px 20px;border:0;border-radius:999px;background:var(--accent);color:#06251f;font:inherit;font-size:13px;font-weight:850;box-shadow:0 8px 22px #0003}.status-reply-btn:active{transform:scale(.97)}
