@@ -1,4 +1,4 @@
-const CACHE='gata-shell-v21';
+const CACHE='gata-shell-v22';
 const ASSETS=['./','./index.html','./style.css','./app.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',e=>e.waitUntil((async()=>{const c=await caches.open(CACHE);await c.addAll(ASSETS);await self.skipWaiting();})()));
 self.addEventListener('activate',e=>e.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('gata-shell-')&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})()));
@@ -18,7 +18,7 @@ self.addEventListener('fetch',e=>{
 self.addEventListener('push',event=>{
  let data={};
  try{data=event.data?event.data.json():{};}catch(_){data={body:event.data?event.data.text():'وصلك رسالة جديدة'};}
- const title=data.title||'جتاب';
+ const title=data.title||'جتا آب - GTA App';
  const options={body:data.body||'وصلك رسالة جديدة',icon:'./icon.svg',badge:'./icon.svg',tag:data.tag||'gata-message',renotify:true,data:{url:data.url||'/gata-app/'}};
  event.waitUntil(self.registration.showNotification(title,options));
 });
