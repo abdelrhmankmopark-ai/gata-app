@@ -114,6 +114,9 @@ async function loadConversations(){
  }
 }
 async function openConversation(id,peerId,name){
+ var workspace=$('chat-view').querySelector('.workspace');
+ if(!workspace.classList.contains('chat-open')){try{history.pushState({gataChat:true},'','#chat');}catch(e){}}
+ workspace.classList.add('chat-open');
  currentConversation=id;currentPeer=peerId;$('welcome-panel').classList.add('hidden');$('active-chat').classList.remove('hidden');
  $('chat-name').textContent=name||'محادثة';$('chat-avatar').textContent=initials(name);if(currentPeer){var pa=await db.from('profiles').select('avatar_url').eq('id',currentPeer).maybeSingle();setAvatar($('chat-avatar'),pa.data&&pa.data.avatar_url);}else setAvatar($('chat-avatar'),null);
  await refreshPeerStatus();await loadMessages();await loadConversations();
@@ -233,10 +236,17 @@ async function saveProfileName(){
 }
 async function refreshApp(){var btn=$('refresh-app-btn');if(btn){btn.disabled=true;btn.textContent='…';}toast('جاري تحديث جتاب...');try{if('serviceWorker' in navigator){var reg=await navigator.serviceWorker.getRegistration();if(reg)await reg.unregister();}if('caches' in window){var keys=await caches.keys();await Promise.all(keys.filter(function(k){return k.indexOf('gata-shell-')===0;}).map(function(k){return caches.delete(k);}));}}catch(e){}window.location.reload();}
 function openFilePicker(input){if(!input)return;try{if(typeof input.showPicker==='function'){input.showPicker();return;}}catch(e){}input.click();}
+function showChats(){
+ var workspace=$('chat-view').querySelector('.workspace');
+ workspace.classList.remove('chat-open');
+ if(location.hash==='#chat'){try{history.replaceState({},' ',location.pathname+location.search);}catch(e){}}
+}
 function initEvents(){
  $('show-login').onclick=function(){showAuth('login');};$('show-signup').onclick=function(){showAuth('signup');};
  $('theme-toggle').onclick=toggleTheme;$('theme-toggle-auth').onclick=toggleTheme;
  $('login-form').addEventListener('submit',login);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);
+ $('back-to-chats').onclick=function(){if(location.hash==='#chat'&&history.state&&history.state.gataChat){history.back();}else{showChats();}};
+ window.addEventListener('popstate',function(){showChats();});
  $('refresh-app-btn').onclick=refreshApp;$('new-chat-btn').onclick=openModal;$('contacts-btn').onclick=openContacts;$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
  $('close-image-preview').onclick=closeImagePreview;$('image-preview').addEventListener('click',function(ev){if(ev.target===$('image-preview'))closeImagePreview();});document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){closeImagePreview();$('modal').classList.add('hidden');$('settings-panel').classList.add('hidden');}});
  $('logout-btn').onclick=logout;$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};$('save-profile-btn').onclick=saveProfileName;
