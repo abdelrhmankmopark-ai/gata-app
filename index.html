@@ -22,22 +22,22 @@
     if(meta)meta.setAttribute('content',light?'#edf4f8':'#0a1020');
   });
 })();
-</script><meta name="description" content="جتاب - محادثاتك في مكان واحد">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata21">
-<title>جتاب | Gata</title>
+</script><meta name="description" content="جتا آب - محادثاتك في مكان واحد">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata22">
+<title>جتا آب | GTA App</title>
 </head>
 <body>
 <div class="bg-glow"></div>
 <main id="app" class="app-shell">
   <section id="auth-view" class="auth-view">
     <button id="theme-toggle-auth" class="theme-float" type="button" onclick="gataToggleTheme()" aria-label="تغيير المظهر" title="تغيير المظهر">☀️</button>
-    <div class="brand-lockup"><div class="brand-mark">G</div><div><div class="brand-name">جتاب</div><div class="brand-sub">GATA · تواصل بطريقتك</div></div></div>
+    <div class="brand-lockup"><div class="brand-mark">G</div><div><div class="brand-name">جتا آب</div><div class="brand-sub">GTA APP · تواصل بطريقتك</div></div></div>
     <div class="glass auth-card">
       <div class="auth-tabs"><button class="tab active" id="show-login">تسجيل الدخول</button><button class="tab" id="show-signup">إنشاء حساب</button></div>
       <form id="login-form" class="form">
         <label>البريد الإلكتروني<input id="login-email" type="email" autocomplete="email" required placeholder="name@example.com"></label>
         <label>كلمة المرور<input id="login-password" type="password" autocomplete="current-password" required placeholder="••••••••"></label>
-        <button class="primary-btn" type="submit">دخول إلى جتاب</button>
+        <button class="primary-btn" type="submit">دخول إلى جتا آب</button>
       </form>
       <form id="signup-form" class="form hidden">
         <label>اسم العرض<input id="signup-name" maxlength="32" required placeholder="اسمك اللي هيظهر للناس"></label>
@@ -49,12 +49,12 @@
       </form>
       <p id="auth-note" class="notice" role="status"></p>
     </div>
-    <p class="footnote">جتاب مستقل، بتصميم وهوية خاصة به.</p>
+    <p class="footnote">جتا آب مستقل، بتصميم وهوية خاصة به.</p>
   </section>
 
   <section id="chat-view" class="chat-view hidden">
     <header class="topbar glass">
-      <div class="brand-lockup compact"><div class="brand-mark small">G</div><div><div class="brand-name">جتاب</div><div class="brand-sub">GATA</div></div></div>
+      <div class="brand-lockup compact"><div class="brand-mark small">G</div><div><div class="brand-name">جتا آب</div><div class="brand-sub">GTA APP</div></div></div>
       <div class="top-actions"><button id="theme-toggle" class="icon-btn theme-toggle" type="button" onclick="window.gataToggleTheme && window.gataToggleTheme()" aria-label="تغيير المظهر" title="تغيير المظهر">☀️</button><button id="refresh-app-btn" class="icon-btn" aria-label="تحديث التطبيق" title="تحديث التطبيق">↻</button><button id="contacts-btn" class="icon-btn" aria-label="جهات الاتصال" title="جهات الاتصال">👥</button><button id="new-chat-btn" class="icon-btn" aria-label="محادثة جديدة" title="محادثة جديدة">＋</button><button id="settings-btn" class="icon-btn" aria-label="الإعدادات" title="الإعدادات">⚙</button><button id="logout-btn" class="icon-btn" aria-label="تسجيل الخروج" title="خروج">↪</button></div>
     </header>
     <div class="workspace">
@@ -63,7 +63,7 @@
         <label class="chat-search-wrap"><span aria-hidden="true">⌕</span><input id="chat-search" type="search" placeholder="ابحث في محادثاتك..." autocomplete="off" aria-label="ابحث في محادثاتك"></label><div id="conversation-list" class="conversation-list"><div class="empty-state">جاري تحميل المحادثات...</div></div>
       </aside>
       <section class="conversation glass">
-        <div id="welcome-panel" class="welcome-panel"><div class="welcome-logo">G</div><h2>أهلاً بيك في جتاب</h2><p>ابدأ محادثة جديدة وابحث عن أصحابك باسم المستخدم.</p><button class="primary-btn" id="welcome-new-chat">ابدأ محادثة</button></div>
+        <div id="welcome-panel" class="welcome-panel"><div class="welcome-logo">G</div><h2>أهلاً بيك في جتا آب</h2><p>ابدأ محادثة جديدة وابحث عن أصحابك باسم المستخدم.</p><button class="primary-btn" id="welcome-new-chat">ابدأ محادثة</button></div>
         <div id="active-chat" class="active-chat hidden">
           <header class="chat-header"><button id="back-to-chats" class="back-to-chats" type="button" aria-label="العودة للمحادثات" title="العودة للمحادثات">→</button><div id="chat-avatar" class="avatar">G</div><div class="chat-person"><strong id="chat-name">محادثة</strong><span id="chat-status" class="muted">غير متصل</span></div></header>
           <div id="messages" class="messages" aria-live="polite"></div>
@@ -77,5 +77,5 @@
   </section>
 </main>
 <div id="toast" class="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata21"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata22"></script>
 </body></html>
