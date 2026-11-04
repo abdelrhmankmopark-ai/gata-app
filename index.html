@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a1020"><meta name="description" content="جتاب - محادثاتك في مكان واحد">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=lightfix2">
 <title>جتاب | Gata</title>
 </head>
 <body>
 <div class="bg-glow"></div>
 <main id="app" class="app-shell">
   <section id="auth-view" class="auth-view">
-    <button id="theme-toggle-auth" class="theme-float" type="button" aria-label="تغيير المظهر" title="تغيير المظهر">☀️</button>
+    <button id="theme-toggle-auth" class="theme-float" type="button" onclick="window.gataToggleTheme && window.gataToggleTheme()" aria-label="تغيير المظهر" title="تغيير المظهر">☀️</button>
     <div class="brand-lockup"><div class="brand-mark">G</div><div><div class="brand-name">جتاب</div><div class="brand-sub">GATA · تواصل بطريقتك</div></div></div>
     <div class="glass auth-card">
       <div class="auth-tabs"><button class="tab active" id="show-login">تسجيل الدخول</button><button class="tab" id="show-signup">إنشاء حساب</button></div>
@@ -35,7 +35,7 @@
   <section id="chat-view" class="chat-view hidden">
     <header class="topbar glass">
       <div class="brand-lockup compact"><div class="brand-mark small">G</div><div><div class="brand-name">جتاب</div><div class="brand-sub">GATA</div></div></div>
-      <div class="top-actions"><button id="theme-toggle" class="icon-btn theme-toggle" type="button" aria-label="تغيير المظهر" title="تغيير المظهر">☀️</button><button id="refresh-app-btn" class="icon-btn" aria-label="تحديث التطبيق" title="تحديث التطبيق">↻</button><button id="new-chat-btn" class="icon-btn" aria-label="محادثة جديدة" title="محادثة جديدة">＋</button><button id="settings-btn" class="icon-btn" aria-label="الإعدادات" title="الإعدادات">⚙</button><button id="logout-btn" class="icon-btn" aria-label="تسجيل الخروج" title="خروج">↪</button></div>
+      <div class="top-actions"><button id="theme-toggle" class="icon-btn theme-toggle" type="button" onclick="window.gataToggleTheme && window.gataToggleTheme()" aria-label="تغيير المظهر" title="تغيير المظهر">☀️</button><button id="refresh-app-btn" class="icon-btn" aria-label="تحديث التطبيق" title="تحديث التطبيق">↻</button><button id="new-chat-btn" class="icon-btn" aria-label="محادثة جديدة" title="محادثة جديدة">＋</button><button id="settings-btn" class="icon-btn" aria-label="الإعدادات" title="الإعدادات">⚙</button><button id="logout-btn" class="icon-btn" aria-label="تسجيل الخروج" title="خروج">↪</button></div>
     </header>
     <div class="workspace">
       <aside class="sidebar glass">
@@ -56,5 +56,5 @@
   </section>
 </main>
 <div id="toast" class="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=lightfix2"></script>
 </body></html>
