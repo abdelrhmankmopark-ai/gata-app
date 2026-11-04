@@ -155,3 +155,11 @@ body{background-attachment:fixed}
 .profile-editor .primary-btn{margin-top:3px}
 body.light .profile-editor{background:rgba(255,255,255,.45);border-color:rgba(91,126,151,.2)}
 body.light .profile-editor input{background:rgba(255,255,255,.82);color:#172b3d;border-color:rgba(91,126,151,.2)}
+
+/* GATA v10 — contacts list */
+.contact-details{min-width:0;flex:1}
+.contact-details strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#search-results .result-user{display:flex;align-items:center;gap:12px}
+#search-results .result-user .primary-btn{flex:0 0 auto}
+#modal-hint{margin-bottom:14px}
+@media(max-width:380px){#search-results .result-user{gap:8px}#search-results .result-user .primary-btn{padding:9px 12px}}
