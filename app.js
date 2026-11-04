@@ -158,11 +158,12 @@ async function changeAvatar(file){
  var url=db.storage.from('gata-avatars').getPublicUrl(path).data.publicUrl,upd=await db.from('profiles').update({avatar_url:url}).eq('id',user.id);if(upd.error){toast('تعذر حفظ الصورة: '+upd.error.message);return;}
  if(profileData)profileData.avatar_url=url;setAvatar($('chat-avatar'),url);toast('تم تحديث الصورة الشخصية');
 }
+async function refreshApp(){var btn=$('refresh-app-btn');if(btn){btn.disabled=true;btn.textContent='…';}toast('جاري تحديث جتاب...');try{if('serviceWorker' in navigator){var reg=await navigator.serviceWorker.getRegistration();if(reg)await reg.unregister();}if('caches' in window){var keys=await caches.keys();await Promise.all(keys.filter(function(k){return k.indexOf('gata-shell-')===0;}).map(function(k){return caches.delete(k);}));}}catch(e){}window.location.reload();}
 function openFilePicker(input){if(!input)return;try{if(typeof input.showPicker==='function'){input.showPicker();return;}}catch(e){}input.click();}
 function initEvents(){
  $('show-login').onclick=function(){showAuth('login');};$('show-signup').onclick=function(){showAuth('signup');};
  $('login-form').addEventListener('submit',login);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);
- $('new-chat-btn').onclick=openModal;$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
+ $('refresh-app-btn').onclick=refreshApp;$('new-chat-btn').onclick=openModal;$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
  $('logout-btn').onclick=logout;$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};
  $('language-select').onchange=function(){language=this.value;localStorage.setItem('gata-language',language);applyLanguage();};
  $('attach-image-btn').onclick=function(){openFilePicker($('image-file-input'));};
