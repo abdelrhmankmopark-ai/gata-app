@@ -365,3 +365,17 @@ body.light .settings-screen{background:#f5f7f8}body.light .settings-profile{back
 .friend-status-item.mine .friend-status-avatar{border:2px dashed var(--muted)}
 .friend-status-item strong{max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:650}
 .status-empty,.status-loading{font-size:11px;color:var(--muted);padding:8px 2px;white-space:nowrap}
+
+
+/* GTA v35 — dedicated Updates tab */
+.updates-panel{width:min(760px,100%);margin:0 auto;padding:18px 20px 100px;flex:1;min-height:calc(100dvh - 170px)}
+.updates-panel.hidden{display:none!important}
+.updates-panel-heading{margin:8px 0 20px;text-align:right}
+.updates-panel-heading h2{font-size:23px;margin:0 0 5px}
+.updates-panel-heading p{margin:0;color:var(--muted);font-size:12px}
+.updates-panel .friend-statuses{margin-top:0;padding-top:0;border-bottom:0}
+.updates-panel .friend-statuses-heading{font-size:15px;margin-bottom:15px}
+.updates-panel .friend-status-list{gap:17px;flex-wrap:wrap;overflow:visible}
+.updates-panel .friend-status-item{flex-basis:76px;width:76px}
+.updates-panel .friend-status-avatar{width:68px;height:68px}
+.updates-panel .friend-status-item strong{max-width:76px;font-size:11px}
