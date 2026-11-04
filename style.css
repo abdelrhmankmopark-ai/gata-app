@@ -93,3 +93,9 @@ body.light .modal-card{background:linear-gradient(145deg,rgba(255,255,255,.94),r
 body.light .primary-btn{background:linear-gradient(115deg,#6bd8c7,#a1e7dc 55%,#a8d8e9);color:#123b42}
 body.light .send-btn{background:linear-gradient(135deg,#5bcfbd,#8adfd2);box-shadow:0 5px 16px rgba(56,155,150,.2)}
 @media(prefers-reduced-motion:reduce){button,.glass{transition:none}}
+/* Responsive top toolbar: keep every action visible on phones */
+.topbar{height:auto;min-height:76px;flex-wrap:wrap;gap:10px;}
+.top-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:7px;min-width:0;}
+.top-actions .icon-btn{flex:0 0 42px;}
+@media(max-width:760px){.topbar{height:auto;min-height:66px;padding:10px 12px;row-gap:9px}.top-actions{flex:1 1 190px;gap:6px}.top-actions .icon-btn{flex-basis:38px;width:38px;height:38px;font-size:20px}}
+@media(max-width:380px){.topbar{align-items:center}.compact{gap:8px}.brand-mark.small{width:38px;height:38px;font-size:23px;border-radius:13px}.compact .brand-name{font-size:18px}.compact .brand-sub{font-size:9px}.top-actions{flex-basis:100%;justify-content:flex-start}.top-actions .icon-btn{flex:1 1 38px;max-width:52px}}
