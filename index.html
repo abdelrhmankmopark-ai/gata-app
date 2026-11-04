@@ -23,7 +23,7 @@
   });
 })();
 </script><meta name="description" content="جتا آب - محادثاتك في مكان واحد">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata30">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata31">
 <title>جتا آب | GTA App</title>
 </head>
 <body>
@@ -85,7 +85,7 @@
  </div>
  <div class="settings-menu">
   <button class="settings-item" id="settings-account-row" type="button"><span class="settings-item-icon">♙</span><span class="settings-item-copy"><strong>الحساب</strong><small>تعديل اسم العرض وبيانات حسابك</small></span><span class="settings-chevron">‹</span></button>
-  <div id="profile-editor" class="profile-editor settings-editor hidden"><label for="profile-display-name">اسم العرض</label><input id="profile-display-name" maxlength="32" placeholder="اكتب اسمك الظاهر"><label for="profile-bio-input">نبذة عنك</label><textarea id="profile-bio-input" maxlength="160" rows="3" placeholder="اكتب نبذة قصيرة عن نفسك..."></textarea><small class="bio-counter"><span id="profile-bio-count">0</span>/160 حرف</small><button id="save-profile-btn" class="primary-btn" type="button">حفظ التغييرات</button></div>
+  <div id="profile-editor" class="profile-editor settings-editor hidden"><label for="profile-display-name">اسم العرض</label><input id="profile-display-name" maxlength="32" placeholder="اكتب اسمك الظاهر"><label for="profile-bio-input">نبذة عنك</label><textarea id="profile-bio-input" maxlength="160" rows="3" placeholder="اكتب نبذة قصيرة عن نفسك..."></textarea><small class="bio-counter"><span id="profile-bio-count">0</span>/160 حرف</small><label for="profile-status-input">حالتك الآن (تختفي بعد 24 ساعة)</label><textarea id="profile-status-input" maxlength="80" rows="2" placeholder="اكتب حالة قصيرة..."></textarea><small class="bio-counter"><span id="profile-status-count">0</span>/80 حرف · الحالة مؤقتة لمدة 24 ساعة</small><button id="save-profile-btn" class="primary-btn" type="button">حفظ التغييرات</button></div>
   <button class="settings-item" id="settings-privacy-row" type="button"><span class="settings-item-icon">🔒</span><span class="settings-item-copy"><strong>الخصوصية</strong><small>التحكم في آخر ظهور وتأكيدات القراءة</small></span><span class="settings-chevron">‹</span></button>
  <div id="privacy-panel" class="privacy-panel hidden">
   <div class="privacy-option"><div><strong>مشاركة آخر ظهور</strong><small>السماح للتطبيق بتحديث حالة اتصالك للآخرين.</small></div><label class="privacy-switch"><input id="privacy-last-seen" type="checkbox" checked><span></span></label></div>
@@ -130,9 +130,9 @@
   <div class="profile-view-cover"></div><div id="public-profile-avatar" class="profile-view-avatar">G</div>
   <h2 id="public-profile-name">الملف الشخصي</h2><p id="public-profile-handle">@username</p>
   <div class="profile-view-details"><div><span>معرّف جتا</span><strong id="public-profile-gataid">—</strong></div><div><span>تاريخ الانضمام</span><strong id="public-profile-joined">—</strong></div><div><span>الحالة</span><strong id="public-profile-status">—</strong></div></div>
-  <p id="public-profile-bio" class="public-profile-bio"></p><p id="public-profile-note" class="info-note">معلومات الحساب الظاهرة على جتا آب.</p>
+  <div id="public-profile-status-card" class="public-profile-status-card hidden"><strong>الحالة الآن</strong><p id="public-profile-status-text"></p><small id="public-profile-status-time"></small></div><p id="public-profile-bio" class="public-profile-bio"></p><p id="public-profile-note" class="info-note">معلومات الحساب الظاهرة على جتا آب.</p>
  </div>
 </div>
 <div id="toast" class="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata30"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata31"></script>
 </body></html>
