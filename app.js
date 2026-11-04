@@ -90,14 +90,41 @@ async function enterApp(){
  if(privacyPref('last-seen',true))await db.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',user.id);
  applyPrivacySettings();await loadConversations();startHeartbeat();subscribeGlobal();
 }
+
+async function loadFriendStatuses(conversationIds){
+ var list=$('friend-status-list');if(!list)return;
+ list.innerHTML='';
+ function addStatus(p,isMine){
+  var name=isMine?'حالتي':(p.display_name||p.username||'صديق');
+  var item=document.createElement('button');item.type='button';item.className='friend-status-item'+(isMine?' mine':'');
+  var avatar=p.avatar_url?'<span class="friend-status-avatar"><img src="'+safe(p.avatar_url)+'" alt=""></span>':'<span class="friend-status-avatar">'+avatarHTML(null,name)+'</span>';
+  item.innerHTML=avatar+'<strong>'+safe(name)+'</strong>';
+  item.addEventListener('click',function(){showPublicProfile(isMine?user.id:p.id);});
+  list.appendChild(item);
+ }
+ addStatus(profileData||{},true);
+ if(!conversationIds||!conversationIds.length){list.insertAdjacentHTML('beforeend','<span class="status-empty">ابدأ محادثة لعرض حالات أصدقائك</span>');return;}
+ var members=await db.from('conversation_members').select('user_id').in('conversation_id',conversationIds);
+ if(members.error){list.insertAdjacentHTML('beforeend','<span class="status-empty">تعذر تحميل الحالات</span>');return;}
+ var peerIds=[...new Set((members.data||[]).map(function(m){return m.user_id;}).filter(function(id){return id&&id!==user.id;}))];
+ if(!peerIds.length){list.insertAdjacentHTML('beforeend','<span class="status-empty">لسه مفيش حالات جديدة</span>');return;}
+ var profiles=await db.from('profiles').select('id,username,display_name,avatar_url,status_text,status_updated_at').in('id',peerIds);
+ if(profiles.error){list.insertAdjacentHTML('beforeend','<span class="status-empty">تعذر تحميل الحالات</span>');return;}
+ var now=Date.now();
+ var active=(profiles.data||[]).filter(function(p){var t=p.status_updated_at?new Date(p.status_updated_at).getTime():0;return !!(p.status_text&&t&&now-t>=0&&now-t<86400000);});
+ if(!active.length){list.insertAdjacentHTML('beforeend','<span class="status-empty">لا توجد حالات جديدة</span>');return;}
+ active.forEach(function(p){addStatus(p,false);});
+}
+
 async function loadConversations(){
  var box=$('conversation-list');box.innerHTML='<div class="empty-state">جاري تحميل المحادثات...</div>';
  var mem=await db.from('conversation_members').select('conversation_id').eq('user_id',user.id);
  if(mem.error){box.innerHTML='<div class="empty-state">'+safe(mem.error.message)+'</div>';return;}
- if(!mem.data.length){box.innerHTML='<div class="empty-state">'+safe(tr('empty'))+'</div>';return;}
+ if(!mem.data.length){await loadFriendStatuses([]);box.innerHTML='<div class="empty-state">'+safe(tr('empty'))+'</div>';return;}
  var ids=mem.data.map(function(x){return x.conversation_id;});
  var conv=await db.from('conversations').select('id,title,is_group,created_at').in('id',ids).order('created_at',{ascending:false});
  if(conv.error){box.innerHTML='<div class="empty-state">'+safe(conv.error.message)+'</div>';return;}
+ await loadFriendStatuses(ids);
  box.innerHTML='';
  for(var i=0;i<conv.data.length;i++){
   var c=conv.data[i];var members=await db.from('conversation_members').select('user_id').eq('conversation_id',c.id);
