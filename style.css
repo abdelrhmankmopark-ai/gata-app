@@ -14,3 +14,5 @@
 .sent-audio{width:min(65vw,300px);height:42px}
 @keyframes pulse{50%{opacity:.55}}
 @media(max-width:480px){.message-form{gap:6px;padding:9px}.tool-btn{width:36px}.send-btn{width:42px}.sent-image{max-width:65vw}}
+
+.file-picker{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;opacity:0;}
