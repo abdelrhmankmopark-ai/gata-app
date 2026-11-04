@@ -2,15 +2,35 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0a1020"><meta name="description" content="جتاب - محادثاتك في مكان واحد">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=lightfix2">
+<meta name="theme-color" content="#0a1020"><script>
+(function(){
+  function gataTheme(){
+    var light=document.body.classList.toggle('light');
+    try{localStorage.setItem('gata-theme',light?'light':'dark');}catch(e){}
+    var icon=light?'🌙':'☀️';
+    document.querySelectorAll('#theme-toggle,#theme-toggle-auth').forEach(function(b){b.textContent=icon;});
+    var meta=document.querySelector('meta[name="theme-color"]');
+    if(meta)meta.setAttribute('content',light?'#edf4f8':'#0a1020');
+  }
+  window.gataToggleTheme=gataTheme;
+  try{if(localStorage.getItem('gata-theme')==='light')document.documentElement.classList.add('gata-start-light');}catch(e){}
+  document.addEventListener('DOMContentLoaded',function(){
+    if(document.documentElement.classList.contains('gata-start-light'))document.body.classList.add('light');
+    var light=document.body.classList.contains('light');
+    document.querySelectorAll('#theme-toggle,#theme-toggle-auth').forEach(function(b){b.textContent=light?'🌙':'☀️';});
+    var meta=document.querySelector('meta[name="theme-color"]');
+    if(meta)meta.setAttribute('content',light?'#edf4f8':'#0a1020');
+  });
+})();
+</script><meta name="description" content="جتاب - محادثاتك في مكان واحد">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=lightfix3">
 <title>جتاب | Gata</title>
 </head>
 <body>
 <div class="bg-glow"></div>
 <main id="app" class="app-shell">
   <section id="auth-view" class="auth-view">
-    <button id="theme-toggle-auth" class="theme-float" type="button" onclick="window.gataToggleTheme && window.gataToggleTheme()" aria-label="تغيير المظهر" title="تغيير المظهر">☀️</button>
+    <button id="theme-toggle-auth" class="theme-float" type="button" onclick="gataToggleTheme()" aria-label="تغيير المظهر" title="تغيير المظهر">☀️</button>
     <div class="brand-lockup"><div class="brand-mark">G</div><div><div class="brand-name">جتاب</div><div class="brand-sub">GATA · تواصل بطريقتك</div></div></div>
     <div class="glass auth-card">
       <div class="auth-tabs"><button class="tab active" id="show-login">تسجيل الدخول</button><button class="tab" id="show-signup">إنشاء حساب</button></div>
@@ -56,5 +76,5 @@
   </section>
 </main>
 <div id="toast" class="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=lightfix2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=lightfix3"></script>
 </body></html>
