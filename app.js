@@ -78,7 +78,7 @@ async function ensureProfile(){
 }
 async function enterApp(){
  $('auth-view').classList.add('hidden');$('chat-view').classList.remove('hidden');
- var p=await ensureProfile();$('my-handle').textContent='@'+p.username;$('settings-user').textContent='@'+p.username;setAvatar($('chat-avatar'),p.avatar_url);
+ var p=await ensureProfile();$('my-handle').textContent='@'+p.username;$('settings-user').textContent='@'+p.username;$('profile-display-name').value=p.display_name||'';setAvatar($('chat-avatar'),p.avatar_url);
  await db.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',user.id);
  await loadConversations();startHeartbeat();subscribeGlobal();
 }
@@ -186,6 +186,18 @@ async function changeAvatar(file){
  var url=db.storage.from('gata-avatars').getPublicUrl(path).data.publicUrl,upd=await db.from('profiles').update({avatar_url:url}).eq('id',user.id);if(upd.error){toast('تعذر حفظ الصورة: '+upd.error.message);return;}
  if(profileData)profileData.avatar_url=url;setAvatar($('chat-avatar'),url);toast('تم تحديث الصورة الشخصية');
 }
+async function saveProfileName(){
+ var input=$('profile-display-name'),name=input.value.trim();
+ if(!name){toast('اكتب اسم عرض صحيح');input.focus();return;}
+ if(name.length>32){toast('اسم العرض طويل جدًا');return;}
+ var btn=$('save-profile-btn');btn.disabled=true;btn.textContent='جاري الحفظ...';
+ var r=await db.from('profiles').update({display_name:name}).eq('id',user.id);
+ btn.disabled=false;btn.textContent='حفظ التغييرات';
+ if(r.error){toast('تعذر حفظ الاسم: '+r.error.message);return;}
+ if(profileData)profileData.display_name=name;
+ toast('تم تحديث اسم العرض بنجاح');
+ await loadConversations();
+}
 async function refreshApp(){var btn=$('refresh-app-btn');if(btn){btn.disabled=true;btn.textContent='…';}toast('جاري تحديث جتاب...');try{if('serviceWorker' in navigator){var reg=await navigator.serviceWorker.getRegistration();if(reg)await reg.unregister();}if('caches' in window){var keys=await caches.keys();await Promise.all(keys.filter(function(k){return k.indexOf('gata-shell-')===0;}).map(function(k){return caches.delete(k);}));}}catch(e){}window.location.reload();}
 function openFilePicker(input){if(!input)return;try{if(typeof input.showPicker==='function'){input.showPicker();return;}}catch(e){}input.click();}
 function initEvents(){
@@ -193,7 +205,7 @@ function initEvents(){
  $('theme-toggle').onclick=toggleTheme;$('theme-toggle-auth').onclick=toggleTheme;
  $('login-form').addEventListener('submit',login);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);
  $('refresh-app-btn').onclick=refreshApp;$('new-chat-btn').onclick=openModal;$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
- $('logout-btn').onclick=logout;$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};
+ $('logout-btn').onclick=logout;$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};$('save-profile-btn').onclick=saveProfileName;
  $('language-select').onchange=function(){language=this.value;localStorage.setItem('gata-language',language);applyLanguage();};
  $('attach-image-btn').onclick=function(){openFilePicker($('image-file-input'));};
  $('image-file-input').onchange=function(){if(this.files&&this.files[0])uploadMedia(this.files[0],'image');this.value='';};
