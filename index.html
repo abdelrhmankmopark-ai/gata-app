@@ -23,7 +23,7 @@
   });
 })();
 </script><meta name="description" content="جتا آب - محادثاتك في مكان واحد">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata27">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata28">
 <title>جتا آب | GTA App</title>
 </head>
 <body>
@@ -79,6 +79,7 @@
   <div class="settings-cover"></div>
   <button id="change-avatar-btn" class="settings-avatar-button" type="button" aria-label="تغيير الصورة الشخصية"><div id="settings-avatar" class="settings-avatar">G</div><span class="avatar-camera">＋</span></button>
   <div id="settings-display-name" class="settings-profile-name">حسابك على جتا آب</div>
+  <button id="open-my-profile" class="view-own-profile" type="button">عرض صفحتي الشخصية</button>
   <div id="settings-user" class="settings-profile-handle">@username</div>
   <input id="avatar-file-input" type="file" accept="image/jpeg,image/png,image/webp" class="file-picker">
  </div>
@@ -124,6 +125,14 @@
 </div>
   </section>
 </main>
+<div id="public-profile-view" class="profile-view hidden" role="dialog" aria-modal="true" aria-label="الصفحة الشخصية">
+ <div class="profile-view-card"><button id="close-public-profile" class="profile-view-close" type="button" aria-label="إغلاق">×</button>
+  <div class="profile-view-cover"></div><div id="public-profile-avatar" class="profile-view-avatar">G</div>
+  <h2 id="public-profile-name">الملف الشخصي</h2><p id="public-profile-handle">@username</p>
+  <div class="profile-view-details"><div><span>معرّف جتا</span><strong id="public-profile-gataid">—</strong></div><div><span>تاريخ الانضمام</span><strong id="public-profile-joined">—</strong></div><div><span>الحالة</span><strong id="public-profile-status">—</strong></div></div>
+  <p id="public-profile-note" class="info-note">معلومات الحساب الظاهرة على جتا آب.</p>
+ </div>
+</div>
 <div id="toast" class="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata27"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata28"></script>
 </body></html>
