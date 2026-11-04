@@ -145,7 +145,28 @@ function subscribeGlobal(){
  .subscribe();
 }
 function startHeartbeat(){if(heartbeat)clearInterval(heartbeat);heartbeat=setInterval(async function(){if(user)await db.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',user.id);if(currentConversation)refreshPeerStatus();},30000);}
-function openModal(){$('modal').classList.remove('hidden');$('user-search').value='';$('search-results').innerHTML='';$('user-search').focus();}
+function openModal(){$('modal-title').textContent='محادثة جديدة';$('modal-hint').textContent='اكتب اسم المستخدم للبحث عنه.';$('search-form').classList.remove('hidden');$('modal').classList.remove('hidden');$('user-search').value='';$('search-results').innerHTML='';$('user-search').focus();}
+async function openContacts(){
+ $('modal-title').textContent='جهات الاتصال';$('modal-hint').textContent='الأشخاص الذين بدأت معهم محادثات على جتاب.';$('search-form').classList.add('hidden');$('search-results').innerHTML='<div class="empty-state">جاري تحميل جهات الاتصال...</div>';$('modal').classList.remove('hidden');
+ var box=$('search-results');
+ var mem=await db.from('conversation_members').select('conversation_id').eq('user_id',user.id);
+ if(mem.error){box.textContent='تعذر تحميل جهات الاتصال: '+mem.error.message;return;}
+ var ids=[...new Set((mem.data||[]).map(function(x){return x.conversation_id;}))];
+ if(!ids.length){box.innerHTML='<div class="empty-state">لسه مفيش جهات اتصال. ابدأ محادثة جديدة لإضافتهم هنا.</div>';return;}
+ var conv=await db.from('conversations').select('id,title,is_group').in('id',ids).order('created_at',{ascending:false});
+ if(conv.error){box.textContent='تعذر تحميل القائمة: '+conv.error.message;return;}
+ var contacts=[];
+ for(var i=0;i<conv.data.length;i++){
+  var c=conv.data[i],members=await db.from('conversation_members').select('user_id').eq('conversation_id',c.id);
+  var peerId=(members.data||[]).map(function(m){return m.user_id;}).find(function(id){return id!==user.id;});
+  if(!peerId)continue;
+  var pr=await db.from('profiles').select('id,username,display_name,avatar_url,last_seen').eq('id',peerId).maybeSingle();
+  if(pr.data&&!contacts.some(function(x){return x.id===pr.data.id;}))contacts.push({profile:pr.data,conversation:c});
+ }
+ box.innerHTML='';
+ if(!contacts.length){box.innerHTML='<div class="empty-state">مفيش جهات اتصال لعرضها حاليًا.</div>';return;}
+ contacts.forEach(function(item){var p=item.profile,c=item.conversation,name=p.display_name||p.username;var row=document.createElement('div');row.className='result-user';row.innerHTML=avatarHTML(p.avatar_url,name)+'<div class="contact-details"><strong>'+safe(name)+'</strong><div class="muted">@'+safe(p.username)+'</div></div><button class="primary-btn" type="button">فتح</button>';row.querySelector('button').onclick=function(){$('modal').classList.add('hidden');openConversation(c.id,p.id,name);};box.appendChild(row);});
+}
 async function searchUsers(e){
  e.preventDefault();var term=$('user-search').value.trim().replace(/^@/,'').toLowerCase();if(term.length<8){toast('اسم المستخدم لازم يكون 8 أحرف على الأقل');return;}
  var r=await db.from('profiles').select('id,username,display_name').eq('username',term).neq('id',user.id).limit(10);
@@ -204,7 +225,7 @@ function initEvents(){
  $('show-login').onclick=function(){showAuth('login');};$('show-signup').onclick=function(){showAuth('signup');};
  $('theme-toggle').onclick=toggleTheme;$('theme-toggle-auth').onclick=toggleTheme;
  $('login-form').addEventListener('submit',login);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);
- $('refresh-app-btn').onclick=refreshApp;$('new-chat-btn').onclick=openModal;$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
+ $('refresh-app-btn').onclick=refreshApp;$('new-chat-btn').onclick=openModal;$('contacts-btn').onclick=openContacts;$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
  $('logout-btn').onclick=logout;$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};$('save-profile-btn').onclick=saveProfileName;
  $('language-select').onchange=function(){language=this.value;localStorage.setItem('gata-language',language);applyLanguage();};
  $('attach-image-btn').onclick=function(){openFilePicker($('image-file-input'));};
