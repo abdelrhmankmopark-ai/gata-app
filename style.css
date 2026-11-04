@@ -404,3 +404,20 @@ body.light .settings-screen{background:#f5f7f8}body.light .settings-profile{back
 .status-viewer-text{font-size:clamp(22px,6vw,34px);font-weight:850;text-align:center;white-space:pre-wrap;overflow-wrap:anywhere;padding:28px}
 .status-viewer-time{font-size:11px;color:#cbd5e1;text-align:center}
 .status-viewer .danger-action{align-self:center;max-width:220px}
+
+/* GATA v41 — polished WhatsApp-style updates rail */
+.updates-panel{padding-top:20px}
+.status-composer{border-radius:22px;box-shadow:0 14px 38px rgba(0,0,0,.08)}
+.status-composer textarea{min-height:76px;line-height:1.7}
+.status-compose-actions button{min-height:42px}
+.updates-panel .friend-status-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:18px 10px;overflow:visible;padding:6px 2px 18px}
+.updates-panel .friend-status-item{width:100%;min-width:0;flex-basis:auto;gap:7px}
+.updates-panel .friend-status-avatar{position:relative;width:68px;height:68px;padding:3px;border:2px solid #42c9a8;background:var(--panel);box-shadow:0 5px 16px rgba(0,0,0,.12)}
+.updates-panel .friend-status-item.mine .friend-status-avatar{border:2px dashed var(--muted)}
+.updates-panel .friend-status-item strong{max-width:100%;font-size:11px}
+.updates-panel .friend-status-item .status-kind{display:block;max-width:100%;font-size:9px;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status-avatar-fallback{width:100%;height:100%;display:grid;place-items:center;border-radius:50%;font-size:21px;font-weight:850;background:linear-gradient(145deg,var(--accent),var(--accent2));color:white}
+.status-add-mark{position:absolute;inset-inline-end:-3px;bottom:-3px;width:23px;height:23px;display:grid;place-items:center;border:2px solid var(--bg);border-radius:50%;background:var(--accent);color:#fff;font-size:19px;line-height:1;font-weight:700}
+.friend-status-item:focus-visible{outline:2px solid var(--accent);outline-offset:5px;border-radius:14px}
+body.light .updates-panel .friend-status-avatar{box-shadow:0 7px 18px rgba(62,110,130,.16)}
+@media(max-width:380px){.updates-panel{padding-inline:13px}.updates-panel .friend-status-list{grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:16px 7px}}
