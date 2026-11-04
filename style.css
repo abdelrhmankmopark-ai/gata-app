@@ -188,3 +188,14 @@ body.light .back-to-chats{background:rgba(255,255,255,.58);color:#29465c;border-
  .workspace.chat-open .messages{max-height:none;min-height:0}
  .workspace.chat-open .message-form{position:sticky;bottom:0}
 }
+
+
+/* GATA v14 — force single-screen navigation on mobile and desktop */
+.workspace:not(.chat-open)>.conversation{display:none!important}
+.workspace:not(.chat-open)>.sidebar{display:block!important;grid-column:1/-1!important;width:100%;min-height:calc(100dvh - 150px)!important;max-height:none!important;overflow-y:auto}
+.workspace.chat-open{display:block!important;width:100%;min-height:calc(100dvh - 150px)!important}
+.workspace.chat-open>.sidebar{display:none!important}
+.workspace.chat-open>.conversation{display:block!important;width:100%;min-height:calc(100dvh - 150px)!important}
+.workspace.chat-open .active-chat{display:flex;flex-direction:column;min-height:calc(100dvh - 150px)!important;height:calc(100dvh - 150px)}
+.workspace.chat-open .messages{flex:1;min-height:0;max-height:none!important;overflow-y:auto}
+@media(max-width:760px){.workspace:not(.chat-open)>.sidebar{min-height:calc(100dvh - 130px)!important}.workspace.chat-open,.workspace.chat-open>.conversation,.workspace.chat-open .active-chat{min-height:calc(100dvh - 130px)!important;height:calc(100dvh - 130px)}.workspace.chat-open .message-form{flex:none}}
