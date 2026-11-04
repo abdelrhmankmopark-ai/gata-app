@@ -421,3 +421,10 @@ body.light .settings-screen{background:#f5f7f8}body.light .settings-profile{back
 .friend-status-item:focus-visible{outline:2px solid var(--accent);outline-offset:5px;border-radius:14px}
 body.light .updates-panel .friend-status-avatar{box-shadow:0 7px 18px rgba(62,110,130,.16)}
 @media(max-width:380px){.updates-panel{padding-inline:13px}.updates-panel .friend-status-list{grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:16px 7px}}
+
+
+/* GTA v42 — keep the add-status badge outside the avatar crop */
+.updates-panel .friend-status-avatar{overflow:visible;position:relative}
+.updates-panel .friend-status-avatar>img{border-radius:50%;overflow:hidden}
+.updates-panel .friend-status-avatar .status-avatar-fallback{overflow:hidden}
+.updates-panel .friend-status-item .status-add-mark{z-index:3;inset-inline-end:-5px;bottom:-4px;width:25px;height:25px;box-shadow:0 2px 8px #0005}
