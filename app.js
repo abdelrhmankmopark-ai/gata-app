@@ -86,11 +86,109 @@ async function ensureProfile(){
 }
 async function enterApp(){
  $('auth-view').classList.add('hidden');$('chat-view').classList.remove('hidden');
- var p=await ensureProfile();$('my-handle').textContent='@'+p.username;$('settings-user').textContent='@'+p.username;$('settings-display-name').textContent=p.display_name||p.username;$('profile-display-name').value=p.display_name||'';$('profile-bio-input').value=p.bio||'';$('profile-bio-count').textContent=($('profile-bio-input').value||'').length;$('profile-status-input').value=p.status_text||'';$('profile-status-count').textContent=($('profile-status-input').value||'').length;setAvatar($('chat-avatar'),p.avatar_url);setAvatar($('settings-avatar'),p.avatar_url);
+ var p=await ensureProfile();$('my-handle').textContent='@'+p.username;$('settings-user').textContent='@'+p.username;$('settings-display-name').textContent=p.display_name||p.username;$('profile-display-name').value=p.display_name||'';$('profile-bio-input').value=p.bio||'';$('profile-bio-count').textContent=($('profile-bio-input').value||'').length;$('profile-status-input').value=String(p.status_text||'').indexOf('GATA_STATUS:')===0?'':(p.status_text||'');$('profile-status-count').textContent=($('profile-status-input').value||'').length;setAvatar($('chat-avatar'),p.avatar_url);setAvatar($('settings-avatar'),p.avatar_url);
  if(privacyPref('last-seen',true))await db.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',user.id);
  applyPrivacySettings();await loadConversations();startHeartbeat();subscribeGlobal();
 }
 
+
+function parseStatusPayload(value){
+ var raw=String(value||'');
+ if(raw.indexOf('GATA_STATUS:')!==0)return {type:'text',text:raw};
+ try{var p=JSON.parse(raw.slice(12));if(p&&['image','video','audio'].includes(p.type)&&p.path)return p;if(p&&p.type==='text')return p;}catch(e){}
+ return {type:'text',text:raw};
+}
+function statusIsActive(p){
+ var t=p&&p.status_updated_at?new Date(p.status_updated_at).getTime():0;
+ return !!(p&&p.status_text&&t&&Date.now()-t>=0&&Date.now()-t<86400000);
+}
+async function showStatusViewer(profileId){
+ var panel=$('status-viewer'),content=$('status-viewer-content'),owner=$('status-viewer-owner'),time=$('status-viewer-time'),del=$('delete-my-status');
+ panel.classList.remove('hidden');content.innerHTML='<span>جاري تحميل الحالة...</span>';owner.textContent='';time.textContent='';del.classList.add('hidden');
+ var data=null;
+ if(profileId===user.id)data=profileData||await ensureProfile();
+ else{var q=await db.from('profiles').select('id,username,display_name,avatar_url,status_text,status_updated_at').eq('id',profileId).maybeSingle();if(q.error||!q.data){content.textContent='تعذر تحميل الحالة';return;}data=q.data;}
+ if(!statusIsActive(data)){content.textContent='انتهت صلاحية الحالة';return;}
+ var payload=parseStatusPayload(data.status_text),name=data.display_name||data.username||'مستخدم جتا';
+ owner.textContent=(profileId===user.id?'حالتي':'حالة '+name);
+ time.textContent='نُشرت '+new Date(data.status_updated_at).toLocaleString('ar-EG',{dateStyle:'medium',timeStyle:'short'});
+ content.innerHTML='';
+ if(payload.type==='text'){
+  var textNode=document.createElement('div');textNode.className='status-viewer-text';textNode.textContent=payload.text||'';content.appendChild(textNode);
+ }else{
+  try{
+   var signed=await db.storage.from('gata-statuses').createSignedUrl(payload.path,3600);
+   if(signed.error)throw signed.error;
+   var media;
+   if(payload.type==='image'){media=document.createElement('img');media.alt='صورة الحالة';}
+   else if(payload.type==='video'){media=document.createElement('video');media.controls=true;media.playsInline=true;media.autoplay=true;}
+   else{media=document.createElement('audio');media.controls=true;media.autoplay=true;}
+   media.src=signed.data.signedUrl;content.appendChild(media);
+   if(payload.text){var caption=document.createElement('p');caption.className='status-viewer-text';caption.textContent=payload.text;content.appendChild(caption);}
+  }catch(err){content.textContent='تعذر تحميل الملف. تأكد من اتصال الإنترنت.';}
+ }
+ if(profileId===user.id)del.classList.remove('hidden');
+}
+async function saveStatusValue(value){
+ var now=new Date().toISOString();
+ var result=await db.from('profiles').update({status_text:value,status_updated_at:now}).eq('id',user.id);
+ if(result.error)throw result.error;
+ if(profileData){profileData.status_text=value;profileData.status_updated_at=now;}
+ await loadFriendStatuses((await db.from('conversation_members').select('conversation_id').eq('user_id',user.id)).data||[].map(function(x){return x.conversation_id;}));
+}
+async function publishTextStatus(){
+ var input=$('quick-status-text'),value=input.value.trim();
+ if(!value){toast('اكتب الحالة الأول');input.focus();return;}
+ if(value.length>80){toast('الحالة لا تزيد عن 80 حرف');return;}
+ try{await saveStatusValue(value);input.value='';toast('تم نشر حالتك لمدة 24 ساعة');}
+ catch(err){toast('تعذر نشر الحالة: '+err.message);}
+}
+async function publishStatusFile(file,kind){
+ if(!file||!user)return;
+ var allowed=kind==='image'?['image/jpeg','image/png','image/webp']:kind==='video'?['video/mp4','video/webm']:['audio/webm','audio/ogg','audio/mp4','audio/mpeg'];
+ if(!allowed.includes(file.type)){toast('صيغة الملف غير مدعومة');return;}
+ var limit=kind==='image'?5*1024*1024:25*1024*1024;
+ if(file.size>limit){toast('حجم الملف أكبر من المسموح');return;}
+ var ext=(file.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'');
+ var path=user.id+'/'+Date.now()+'-'+Math.random().toString(36).slice(2)+'.'+ext;
+ var note=$('status-compose-note');note.textContent='جاري رفع الحالة...';
+ var up=await db.storage.from('gata-statuses').upload(path,file,{contentType:file.type,upsert:false});
+ if(up.error){note.textContent='';toast('تعذر رفع الحالة: '+up.error.message);return;}
+ var caption=$('quick-status-text').value.trim();
+ var payload='GATA_STATUS:'+JSON.stringify({type:kind,path:path,mime:file.type,text:caption||''});
+ try{await saveStatusValue(payload);$('quick-status-text').value='';note.textContent='تم نشر الحالة وستختفي بعد 24 ساعة';toast('تم نشر الحالة بنجاح');}
+ catch(err){await db.storage.from('gata-statuses').remove([path]);note.textContent='';toast('تعذر حفظ الحالة: '+err.message);}
+}
+async function recordStatusAudio(){
+ var btn=$('record-status-audio');
+ if(statusRecorder&&statusRecorder.state==='recording'){statusRecorder.stop();btn.textContent='🎙 تسجيل صوتي';btn.disabled=true;return;}
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){toast('تسجيل الصوت غير مدعوم في المتصفح ده');return;}
+ try{
+  var stream=await navigator.mediaDevices.getUserMedia({audio:true}),chunks=[];
+  var types=['audio/webm;codecs=opus','audio/ogg;codecs=opus','audio/mp4'],mime=types.find(function(t){return MediaRecorder.isTypeSupported(t);});
+  statusRecorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);
+  statusRecorder.ondataavailable=function(e){if(e.data.size)chunks.push(e.data);};
+  statusRecorder.onstop=async function(){
+   stream.getTracks().forEach(function(t){t.stop();});
+   var blob=new Blob(chunks,{type:statusRecorder.mimeType||'audio/webm'}),type=blob.type.split(';')[0]||'audio/webm';
+   btn.disabled=false;
+   var ext=type==='audio/ogg'?'ogg':type==='audio/mp4'?'mp4':'webm';
+   await publishStatusFile(new File([blob],'status-voice.'+ext,{type:type}),'audio');
+  };
+  statusRecorder.start();btn.textContent='■ إيقاف وإرسال';toast('التسجيل بدأ؛ اضغط إيقاف وإرسال عند الانتهاء');
+ }catch(err){toast('اسمح باستخدام الميكروفون لتسجيل الحالة');}
+}
+async function deleteMyStatus(){
+ if(!confirm('تحذف حالتك الحالية؟'))return;
+ var payload=parseStatusPayload(profileData&&profileData.status_text);
+ if(payload.path)await db.storage.from('gata-statuses').remove([payload.path]);
+ var result=await db.from('profiles').update({status_text:null,status_updated_at:null}).eq('id',user.id);
+ if(result.error){toast('تعذر حذف الحالة: '+result.error.message);return;}
+ if(profileData){profileData.status_text=null;profileData.status_updated_at=null;}
+ $('status-viewer').classList.add('hidden');await loadFriendStatuses([]);toast('تم حذف حالتك');
+}
+
+var statusRecorder=null;
 async function loadFriendStatuses(conversationIds){
  var list=$('friend-status-list');if(!list)return;
  list.innerHTML='';
@@ -99,7 +197,7 @@ async function loadFriendStatuses(conversationIds){
   var item=document.createElement('button');item.type='button';item.className='friend-status-item'+(isMine?' mine':'');
   var avatar=p.avatar_url?'<span class="friend-status-avatar"><img src="'+safe(p.avatar_url)+'" alt=""></span>':'<span class="friend-status-avatar">'+avatarHTML(null,name)+'</span>';
   item.innerHTML=avatar+'<strong>'+safe(name)+'</strong>';
-  item.addEventListener('click',function(){showPublicProfile(isMine?user.id:p.id);});
+  item.classList.add('has-status');item.addEventListener('click',function(){showStatusViewer(isMine?user.id:p.id);});
   list.appendChild(item);
  }
  addStatus(profileData||{},true);
@@ -111,7 +209,7 @@ async function loadFriendStatuses(conversationIds){
  var profiles=await db.from('profiles').select('id,username,display_name,avatar_url,status_text,status_updated_at').in('id',peerIds);
  if(profiles.error){list.insertAdjacentHTML('beforeend','<span class="status-empty">تعذر تحميل الحالات</span>');return;}
  var now=Date.now();
- var active=(profiles.data||[]).filter(function(p){var t=p.status_updated_at?new Date(p.status_updated_at).getTime():0;return !!(p.status_text&&t&&now-t>=0&&now-t<86400000);});
+ var active=(profiles.data||[]).filter(function(p){return statusIsActive(p);});
  if(!active.length){list.insertAdjacentHTML('beforeend','<span class="status-empty">لا توجد حالات جديدة</span>');return;}
  active.forEach(function(p){addStatus(p,false);});
 }
@@ -173,7 +271,7 @@ async function deleteConversation(id,name){
  toast('تم حذف الدردشة من قائمتك');
  await loadConversations();
 }
-async function showPublicProfile(profileId){var panel=$('public-profile-view');panel.classList.remove('hidden');$('public-profile-name').textContent='جاري تحميل الملف الشخصي...';$('public-profile-handle').textContent='';$('public-profile-gataid').textContent='—';$('public-profile-joined').textContent='—';$('public-profile-status').textContent='—';$('public-profile-status-card').classList.add('hidden');setAvatar($('public-profile-avatar'),null);var data=null;if(profileId===user.id){data=profileData||await ensureProfile();}else{var result=await db.from('profiles').select('id,username,display_name,avatar_url,gata_id,created_at,last_seen,bio,status_text,status_updated_at').eq('id',profileId).maybeSingle();if(result.error||!result.data){$('public-profile-name').textContent='تعذر تحميل الملف الشخصي';$('public-profile-note').textContent='ممكن يكون الحساب غير متاح حاليًا.';return;}data=result.data;}var name=data.display_name||data.username||'مستخدم جتا';$('public-profile-name').textContent=name;$('public-profile-bio').textContent=data.bio||'لم يكتب نبذة شخصية بعد.';$('public-profile-handle').textContent='@'+(data.username||'—');$('public-profile-gataid').textContent=data.gata_id||'غير متاح';$('public-profile-joined').textContent=data.created_at?new Date(data.created_at).toLocaleDateString('ar-EG',{year:'numeric',month:'long'}):'غير متاح';var online=data.last_seen&&(Date.now()-new Date(data.last_seen).getTime()<65000);$('public-profile-status').textContent=profileId===user.id?'حسابك':(online?'متصل الآن':'غير متصل');var statusTime=data.status_updated_at?new Date(data.status_updated_at):null;var age=statusTime?Date.now()-statusTime.getTime():Infinity;var activeStatus=!!(data.status_text&&statusTime&&age>=0&&age<24*60*60*1000);if(activeStatus){$('public-profile-status-text').textContent=data.status_text;$('public-profile-status-time').textContent='نُشرت '+statusTime.toLocaleString('ar-EG',{dateStyle:'medium',timeStyle:'short'});$('public-profile-status-card').classList.remove('hidden');}$('public-profile-note').textContent=profileId===user.id?'دي صفحتك الشخصية كما تظهر داخل جتا آب.':'دي المعلومات العامة المتاحة للحساب على جتا آب.';setAvatar($('public-profile-avatar'),data.avatar_url);}
+async function showPublicProfile(profileId){var panel=$('public-profile-view');panel.classList.remove('hidden');$('public-profile-name').textContent='جاري تحميل الملف الشخصي...';$('public-profile-handle').textContent='';$('public-profile-gataid').textContent='—';$('public-profile-joined').textContent='—';$('public-profile-status').textContent='—';$('public-profile-status-card').classList.add('hidden');setAvatar($('public-profile-avatar'),null);var data=null;if(profileId===user.id){data=profileData||await ensureProfile();}else{var result=await db.from('profiles').select('id,username,display_name,avatar_url,gata_id,created_at,last_seen,bio,status_text,status_updated_at').eq('id',profileId).maybeSingle();if(result.error||!result.data){$('public-profile-name').textContent='تعذر تحميل الملف الشخصي';$('public-profile-note').textContent='ممكن يكون الحساب غير متاح حاليًا.';return;}data=result.data;}var name=data.display_name||data.username||'مستخدم جتا';$('public-profile-name').textContent=name;$('public-profile-bio').textContent=data.bio||'لم يكتب نبذة شخصية بعد.';$('public-profile-handle').textContent='@'+(data.username||'—');$('public-profile-gataid').textContent=data.gata_id||'غير متاح';$('public-profile-joined').textContent=data.created_at?new Date(data.created_at).toLocaleDateString('ar-EG',{year:'numeric',month:'long'}):'غير متاح';var online=data.last_seen&&(Date.now()-new Date(data.last_seen).getTime()<65000);$('public-profile-status').textContent=profileId===user.id?'حسابك':(online?'متصل الآن':'غير متصل');var statusTime=data.status_updated_at?new Date(data.status_updated_at):null;var age=statusTime?Date.now()-statusTime.getTime():Infinity;var parsedStatus=parseStatusPayload(data.status_text);var activeStatus=!!(data.status_text&&statusTime&&age>=0&&age<24*60*60*1000);if(activeStatus){$('public-profile-status-text').textContent=parsedStatus.type==='text'?parsedStatus.text:('حالة '+(parsedStatus.type==='image'?'بصورة':parsedStatus.type==='video'?'بفيديو':'صوتية'));$('public-profile-status-time').textContent='نُشرت '+statusTime.toLocaleString('ar-EG',{dateStyle:'medium',timeStyle:'short'});$('public-profile-status-card').classList.remove('hidden');}$('public-profile-note').textContent=profileId===user.id?'دي صفحتك الشخصية كما تظهر داخل جتا آب.':'دي المعلومات العامة المتاحة للحساب على جتا آب.';setAvatar($('public-profile-avatar'),data.avatar_url);}
 async function openConversation(id,peerId,name){
  var workspace=$('chat-view').querySelector('.workspace');
  if(!workspace.classList.contains('chat-open')){try{history.pushState({gataChat:true},'','#chat');}catch(e){}}
@@ -291,7 +389,7 @@ async function changeAvatar(file){
  if(profileData)profileData.avatar_url=url;setAvatar($('chat-avatar'),url);setAvatar($('settings-avatar'),url);toast('تم تحديث الصورة الشخصية');
 }
 async function saveProfileName(){
- var input=$('profile-display-name'),name=input.value.trim(),bio=$('profile-bio-input').value.trim(),status=$('profile-status-input').value.trim();
+ var input=$('profile-display-name'),name=input.value.trim(),bio=$('profile-bio-input').value.trim(),status=$('profile-status-input').value.trim();if(!status&&profileData&&String(profileData.status_text||'').indexOf('GATA_STATUS:')===0)status=profileData.status_text;
  if(!name){toast('اكتب اسم عرض صحيح');input.focus();return;}
  if(name.length>32){toast('اسم العرض طويل جدًا');return;}
  if(bio.length>160){toast('النبذة لا تزيد عن 160 حرف');return;}
@@ -300,7 +398,7 @@ async function saveProfileName(){
  var now=new Date().toISOString();var r=await db.from('profiles').update({display_name:name,bio:bio||null,status_text:status||null,status_updated_at:status?now:null}).eq('id',user.id);
  btn.disabled=false;btn.textContent='حفظ التغييرات';
  if(r.error){toast('تعذر حفظ الملف الشخصي: '+r.error.message);return;}
- if(profileData){profileData.display_name=name;profileData.bio=bio||null;profileData.status_text=status||null;profileData.status_updated_at=status?now:null;}$('settings-display-name').textContent=name;
+ if(profileData){profileData.display_name=name;profileData.bio=bio||null;if(String(status).indexOf('GATA_STATUS:')!==0){profileData.status_text=status||null;profileData.status_updated_at=status?now:null;}}$('settings-display-name').textContent=name;
  toast('تم حفظ الاسم والنبذة والحالة بنجاح');await loadConversations();
 }
 async function refreshApp(){var btn=$('refresh-app-btn');if(btn){btn.disabled=true;btn.textContent='…';}toast('جاري تحديث جتاب...');try{if('serviceWorker' in navigator){var reg=await navigator.serviceWorker.getRegistration();if(reg)await reg.unregister();}if('caches' in window){var keys=await caches.keys();await Promise.all(keys.filter(function(k){return k.indexOf('gata-shell-')===0;}).map(function(k){return caches.delete(k);}));}}catch(e){}window.location.reload();}
@@ -333,9 +431,20 @@ function initEvents(){
  $('chat-search').addEventListener('input',filterConversations);
  $('refresh-app-btn').onclick=function(){closeTopMenu();refreshApp();};$('new-chat-btn').onclick=function(){closeTopMenu();openModal();};$('contacts-btn').onclick=function(){closeTopMenu();openContacts();};
  var bottomNav=$('bottom-nav');if(bottomNav){bottomNav.addEventListener('click',function(ev){var item=ev.target.closest('[data-nav]');if(!item)return;var key=item.getAttribute('data-nav');if(key==='chats'){showChats();bottomNav.querySelectorAll('.bottom-nav-item').forEach(function(b){b.classList.toggle('active',b===item);if(b===item)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});showChats();return;}if(key==='updates'){showUpdates();bottomNav.querySelectorAll('.bottom-nav-item').forEach(function(b){b.classList.toggle('active',b===item);if(b===item)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});return;}toast('القسم ده هيتاح قريبًا');});}$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
- $('close-image-preview').onclick=closeImagePreview;$('image-preview').addEventListener('click',function(ev){if(ev.target===$('image-preview'))closeImagePreview();});document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){closeTopMenu();closeImagePreview();$('modal').classList.add('hidden');$('settings-panel').classList.add('hidden');$('public-profile-view').classList.add('hidden');}});
- $('logout-btn').onclick=function(){closeTopMenu();logout();};$('open-my-profile').onclick=function(){showPublicProfile(user.id);};$('profile-bio-input').addEventListener('input',function(){$('profile-bio-count').textContent=this.value.length;});$('profile-status-input').addEventListener('input',function(){$('profile-status-count').textContent=this.value.length;});$('close-public-profile').onclick=function(){$('public-profile-view').classList.add('hidden');};$('public-profile-view').onclick=function(ev){if(ev.target===$('public-profile-view'))$('public-profile-view').classList.add('hidden');};$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');if(profileData){$('settings-display-name').textContent=profileData.display_name||profileData.username;$('settings-user').textContent='@'+profileData.username;$('profile-display-name').value=profileData.display_name||'';$('profile-bio-input').value=profileData.bio||'';$('profile-bio-count').textContent=($('profile-bio-input').value||'').length;$('profile-status-input').value=profileData.status_text||'';$('profile-status-count').textContent=($('profile-status-input').value||'').length;setAvatar($('settings-avatar'),profileData.avatar_url);}};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};$('save-profile-btn').onclick=saveProfileName;$('settings-account-row').onclick=function(){$('profile-editor').classList.toggle('hidden');};$('settings-privacy-row').onclick=function(){$('privacy-panel').classList.toggle('hidden');applyPrivacySettings();};$('settings-storage-row').onclick=function(){$('storage-panel').classList.toggle('hidden');if(!$('storage-panel').classList.contains('hidden'))loadStorageStats();};$('settings-device-row').onclick=function(){$('device-panel').classList.toggle('hidden');if(!$('device-panel').classList.contains('hidden'))loadSessionInfo();};$('signout-other-sessions').onclick=signOutOtherSessions;$('settings-help-row').onclick=function(){$('help-panel').classList.toggle('hidden');$('about-panel').classList.add('hidden');};$('settings-about-row').onclick=function(){$('about-panel').classList.toggle('hidden');$('help-panel').classList.add('hidden');};$('storage-refresh-btn').onclick=loadStorageStats;$('privacy-last-seen').onchange=function(){setPrivacyPref('last-seen',this.checked);if(this.checked&&user)db.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',user.id);toast(this.checked?'تم تفعيل مشاركة آخر ظهور':'تم إيقاف مشاركة آخر ظهور');};$('privacy-read-receipts').onchange=function(){setPrivacyPref('read-receipts',this.checked);toast(this.checked?'تم تفعيل تأكيدات القراءة':'تم إيقاف تأكيدات القراءة');};
+ $('close-image-preview').onclick=closeImagePreview;$('image-preview').addEventListener('click',function(ev){if(ev.target===$('image-preview'))closeImagePreview();});document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){$('status-viewer').classList.add('hidden');closeTopMenu();closeImagePreview();$('modal').classList.add('hidden');$('settings-panel').classList.add('hidden');$('public-profile-view').classList.add('hidden');}});
+ $('logout-btn').onclick=function(){closeTopMenu();logout();};$('open-my-profile').onclick=function(){showPublicProfile(user.id);};$('profile-bio-input').addEventListener('input',function(){$('profile-bio-count').textContent=this.value.length;});$('profile-status-input').addEventListener('input',function(){$('profile-status-count').textContent=this.value.length;});$('close-public-profile').onclick=function(){$('public-profile-view').classList.add('hidden');};$('public-profile-view').onclick=function(ev){if(ev.target===$('public-profile-view'))$('public-profile-view').classList.add('hidden');};$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');if(profileData){$('settings-display-name').textContent=profileData.display_name||profileData.username;$('settings-user').textContent='@'+profileData.username;$('profile-display-name').value=profileData.display_name||'';$('profile-bio-input').value=profileData.bio||'';$('profile-bio-count').textContent=($('profile-bio-input').value||'').length;$('profile-status-input').value=String(profileData.status_text||'').indexOf('GATA_STATUS:')===0?'':(profileData.status_text||'');$('profile-status-count').textContent=($('profile-status-input').value||'').length;setAvatar($('settings-avatar'),profileData.avatar_url);}};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};$('save-profile-btn').onclick=saveProfileName;$('settings-account-row').onclick=function(){$('profile-editor').classList.toggle('hidden');};$('settings-privacy-row').onclick=function(){$('privacy-panel').classList.toggle('hidden');applyPrivacySettings();};$('settings-storage-row').onclick=function(){$('storage-panel').classList.toggle('hidden');if(!$('storage-panel').classList.contains('hidden'))loadStorageStats();};$('settings-device-row').onclick=function(){$('device-panel').classList.toggle('hidden');if(!$('device-panel').classList.contains('hidden'))loadSessionInfo();};$('signout-other-sessions').onclick=signOutOtherSessions;$('settings-help-row').onclick=function(){$('help-panel').classList.toggle('hidden');$('about-panel').classList.add('hidden');};$('settings-about-row').onclick=function(){$('about-panel').classList.toggle('hidden');$('help-panel').classList.add('hidden');};$('storage-refresh-btn').onclick=loadStorageStats;$('privacy-last-seen').onchange=function(){setPrivacyPref('last-seen',this.checked);if(this.checked&&user)db.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',user.id);toast(this.checked?'تم تفعيل مشاركة آخر ظهور':'تم إيقاف مشاركة آخر ظهور');};$('privacy-read-receipts').onchange=function(){setPrivacyPref('read-receipts',this.checked);toast(this.checked?'تم تفعيل تأكيدات القراءة':'تم إيقاف تأكيدات القراءة');};
  $('language-select').onchange=function(){language=this.value;localStorage.setItem('gata-language',language);applyLanguage();};
+
+ $('publish-text-status').onclick=publishTextStatus;
+ $('pick-image-status').onclick=function(){openFilePicker($('status-media-input'));};
+ $('pick-video-status').onclick=function(){openFilePicker($('status-video-input'));};
+ $('status-media-input').onchange=function(){if(this.files&&this.files[0])publishStatusFile(this.files[0],'image');this.value='';};
+ $('status-video-input').onchange=function(){if(this.files&&this.files[0])publishStatusFile(this.files[0],'video');this.value='';};
+ $('record-status-audio').onclick=recordStatusAudio;
+ $('close-status-viewer').onclick=function(){$('status-viewer').classList.add('hidden');$('status-viewer-content').innerHTML='';};
+ $('status-viewer').onclick=function(ev){if(ev.target===$('status-viewer')){$('status-viewer').classList.add('hidden');$('status-viewer-content').innerHTML='';}};
+ $('delete-my-status').onclick=deleteMyStatus;
+
  $('attach-image-btn').onclick=function(){openFilePicker($('image-file-input'));};
  $('image-file-input').onchange=function(){if(this.files&&this.files[0])uploadMedia(this.files[0],'image');this.value='';};
  $('record-audio-btn').onclick=async function(){
