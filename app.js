@@ -117,10 +117,20 @@ async function loadConversations(){
    }
   }catch(err){}
   if(currentConversation===c.id)unreadCount=0;
-  var b=document.createElement('button');b.className='conversation-item'+(currentConversation===c.id?' active':'');
-  b.innerHTML=avatarHTML(peer&&peer.avatar_url,name)+'<div class="conversation-info"><strong>'+safe(name)+'</strong><span class="conversation-preview">'+safe(preview)+'</span></div><div class="conversation-side">'+(time?'<time class="conversation-time">'+safe(time)+'</time>':'')+(unreadCount?'<span class="unread-badge" aria-label="'+unreadCount+' رسائل غير مقروءة">'+(unreadCount>99?'99+':unreadCount)+'</span>':'')+'</div>';
-  b.addEventListener('click',(function(id,p,n){return function(){openConversation(id,p,n);};})(c.id,peerId,name));box.appendChild(b);
+  var b=document.createElement('div');b.className='conversation-item'+(currentConversation===c.id?' active':'');b.setAttribute('role','button');b.tabIndex=0;
+  b.innerHTML=avatarHTML(peer&&peer.avatar_url,name)+'<div class="conversation-info"><strong>'+safe(name)+'</strong><span class="conversation-preview">'+safe(preview)+'</span></div><div class="conversation-side">'+(time?'<time class="conversation-time">'+safe(time)+'</time>':'')+(unreadCount?'<span class="unread-badge" aria-label="'+unreadCount+' رسائل غير مقروءة">'+(unreadCount>99?'99+':unreadCount)+'</span>':'')+'</div><button class="delete-chat-btn" type="button" title="حذف الدردشة" aria-label="حذف الدردشة">🗑</button>';
+  b.addEventListener('click',(function(id,p,n){return function(){openConversation(id,p,n);};})(c.id,peerId,name));
+  b.addEventListener('keydown',(function(id,p,n){return function(ev){if((ev.key==='Enter'||ev.key===' ')&&ev.target===b){ev.preventDefault();openConversation(id,p,n);}};})(c.id,peerId,name));
+  b.querySelector('.delete-chat-btn').addEventListener('click',function(ev){ev.stopPropagation();deleteConversation(c.id,name);});box.appendChild(b);
  }
+}
+async function deleteConversation(id,name){
+ if(!confirm('حذف دردشة '+name+' من قائمة محادثاتك؟ لن تُحذف الرسائل من حساب الطرف الآخر.'))return;
+ var result=await db.from('conversation_members').delete().eq('conversation_id',id).eq('user_id',user.id);
+ if(result.error){toast('تعذر حذف الدردشة: '+result.error.message);return;}
+ if(currentConversation===id){currentConversation=null;currentPeer=null;showChats();$('active-chat').classList.add('hidden');$('welcome-panel').classList.remove('hidden');}
+ toast('تم حذف الدردشة من قائمتك');
+ await loadConversations();
 }
 async function openConversation(id,peerId,name){
  var workspace=$('chat-view').querySelector('.workspace');
