@@ -689,3 +689,18 @@ body.light .presence-indicator{border-color:#fff}
 
 /* GATA v58 — message selection, typing and sound settings */
 .message-selection-toolbar{display:flex;align-items:center;gap:9px;padding:7px 12px;border-bottom:1px solid var(--line);min-height:44px}.message-selection-toolbar button{border:1px solid var(--line);border-radius:10px;padding:6px 11px;background:var(--panel);color:var(--text);font-size:11px}.message-selection-toolbar button:disabled{opacity:.45}.message-selection-toolbar #selected-message-count{flex:1;color:var(--muted);font-size:11px}.message-select-btn{width:22px;height:22px;border:1px solid var(--accent);border-radius:50%;background:transparent;color:var(--text);font-size:12px;line-height:1;padding:0}.message-select-btn.selected{background:var(--accent);color:#06201e}.message-selection-mode .message-select-btn:not(.hidden){display:inline-grid!important;place-items:center}.message-selection-mode .bubble:has(.message-select-btn.selected){outline:1px solid var(--accent)}.sound-setting-label{display:block;margin:8px 0;font-size:13px}.sound-select{width:100%;padding:11px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text)}.chat-person span.is-typing{color:var(--accent);font-weight:800}
+
+
+/* GATA v59 — profile polish, browser alerts and archived chats */
+.section-heading{gap:8px}
+.archived-toggle{border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--accent2);padding:7px 10px;font:inherit;font-size:11px;font-weight:700;white-space:nowrap}
+.archive-chat-btn{width:30px;height:30px;flex:0 0 30px;border:0;border-radius:50%;background:transparent;color:var(--muted);font-size:17px}
+.archive-chat-btn:active{background:rgba(37,211,102,.14)}
+.conversation-side{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.notification-enable{border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--accent2);padding:7px 10px;font:inherit;font-size:11px;font-weight:700}
+.settings-profile{position:relative}
+.settings-profile .settings-cover{background:linear-gradient(125deg,#075e54,#25d366 65%,#b8e9d4)!important}
+.settings-avatar-button{transition:transform .18s ease}
+.settings-avatar-button:active{transform:scale(.96)}
+body:not(.light) .archived-toggle,body:not(.light) .notification-enable{background:#2a3942;color:#25d366;border-color:#35464f}
+@media(max-width:759px){.section-heading{flex-wrap:wrap}.archived-toggle{margin-inline-start:auto}}
