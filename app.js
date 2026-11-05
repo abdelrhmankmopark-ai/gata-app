@@ -317,6 +317,18 @@ async function refreshPeerStatus(){
  var online=r.data&&r.data.last_seen&&(Date.now()-new Date(r.data.last_seen).getTime()<65000);
  $('chat-status').textContent=online?tr('online'):tr('offline');
 }
+function updateChatScrollButton(){
+ var box=$('messages'),btn=$('chat-scroll-toggle');if(!box||!btn)return;
+ var atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<90;
+ btn.textContent=atBottom?'↑':'↓';
+ btn.setAttribute('aria-label',atBottom?'الانتقال لأول المحادثة':'الانتقال لآخر المحادثة');
+ btn.title=atBottom?'أعلى المحادثة':'آخر رسالة';
+}
+function toggleChatScroll(){
+ var box=$('messages');if(!box)return;
+ var atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<90;
+ box.scrollTo({top:atBottom?0:box.scrollHeight,behavior:'smooth'});
+}
 async function loadMessages(){
  var box=$('messages');box.innerHTML='';
  var r=await db.from('messages').select('id,sender_id,content,created_at').eq('conversation_id',currentConversation).order('created_at',{ascending:true}).limit(150);
@@ -324,7 +336,7 @@ async function loadMessages(){
  var incoming=[];
  r.data.forEach(function(m){renderMessage(m);if(m.sender_id!==user.id)incoming.push(m.id);});
  if(incoming.length&&privacyPref('read-receipts',true)){var rows=incoming.map(function(id){return {message_id:id,reader_id:user.id};});await db.from('message_reads').upsert(rows,{onConflict:'message_id,reader_id',ignoreDuplicates:true});}
- box.scrollTop=box.scrollHeight;
+ box.scrollTop=box.scrollHeight;updateChatScrollButton();
 }
 function decodeReplyContent(value){
  try{var raw=String(value||'');if(raw.indexOf('GATA_REPLY:')!==0)return null;var data=JSON.parse(raw.slice(11));return data&&typeof data==='object'?data:null;}catch(e){return null;}
@@ -468,6 +480,7 @@ function initEvents(){
  $('top-menu-toggle').onclick=function(ev){ev.stopPropagation();var menu=$('top-menu'),open=menu.classList.toggle('hidden')===false;this.setAttribute('aria-expanded',open?'true':'false');};document.addEventListener('click',function(ev){if(!ev.target.closest('.top-menu-wrap'))closeTopMenu();});
  $('theme-toggle').onclick=toggleTheme;$('theme-toggle-auth').onclick=toggleTheme;
  $('login-form').addEventListener('submit',login);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);$('cancel-message-reply').onclick=clearMessageReply;
+ $('chat-scroll-toggle').onclick=toggleChatScroll;$('messages').addEventListener('scroll',updateChatScrollButton,{passive:true});
  $('back-to-chats').onclick=function(){if(location.hash==='#chat'&&history.state&&history.state.gataChat){history.back();}else{showChats();}};
  window.addEventListener('popstate',function(){showChats();});
  $('chat-search').addEventListener('input',filterConversations);
