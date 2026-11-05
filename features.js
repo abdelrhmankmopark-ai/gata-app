@@ -61,7 +61,7 @@ async function openCommunity(c){
  $('community-invite-code').textContent='كود الدعوة: '+c.invite_code+' — شاركه مع أصدقائك';
  if(communityChannel){await db.removeChannel(communityChannel);communityChannel=null;}
  await loadCommunityMessages();
- communityChannel=db.channel('community-messages-'+c.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'community_messages',filter:'community_id=eq.'+c.id},function(payload){renderCommunityMessage(payload.new);}).subscribe();
+ communityChannel=db.channel('community-messages-'+c.id,{config:{private:true}}).on('postgres_changes',{event:'INSERT',schema:'public',table:'community_messages',filter:'community_id=eq.'+c.id},function(payload){renderCommunityMessage(payload.new);}).subscribe();
 }
 async function loadCommunityMessages(){
  var box=$('community-messages');box.innerHTML='<p class="muted">جاري تحميل الرسائل...</p>';
@@ -240,7 +240,7 @@ function init(){
   me=session&&session.user||null;window.gataUser=me;
   if(callsFeed){db.removeChannel(callsFeed);callsFeed=null;}
   if(me){
-   callsFeed=db.channel('call-invitations-'+me.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'call_participants',filter:'user_id=eq.'+me.id},function(payload){handleIncoming(payload.new);}).subscribe();
+   callsFeed=db.channel('call-invitations-'+me.id,{config:{private:true}}).on('postgres_changes',{event:'INSERT',schema:'public',table:'call_participants',filter:'user_id=eq.'+me.id},function(payload){handleIncoming(payload.new);}).subscribe();
   }
  });
  db.auth.getSession().then(function(r){me=r.data.session&&r.data.session.user||window.gataUser||null;if(me&&!callsFeed){callsFeed=db.channel('call-invitations-'+me.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'call_participants',filter:'user_id=eq.'+me.id},function(payload){handleIncoming(payload.new);}).subscribe();}});
