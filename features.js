@@ -102,14 +102,14 @@ async function startDirectCall(type){
  var peer=window.gataCurrentPeerId;if(!peer){say('افتح محادثة الشخص الأول لبدء المكالمة');return;}
  await createCall(type,'direct',null,[peer]);
 }
-async function startCommunityCall(){
+async function startCommunityCall(type){
  if(!activeCommunity)return;
  var r=await db.from('community_members').select('user_id').eq('community_id',activeCommunity.id);
  if(r.error){say('تعذر قراءة أعضاء المجتمع: '+r.error.message);return;}
  var peers=(r.data||[]).map(function(x){return x.user_id;}).filter(function(x){return x!==me.id;});
  if(!peers.length){say('مفيش أعضاء آخرين في المجتمع لبدء المكالمة');return;}
  if(peers.length>5){say('المكالمة الجماعية التجريبية تدعم حتى 6 أشخاص حاليًا');return;}
- await createCall('audio','community',activeCommunity.id,peers);
+ await createCall(type||'audio','community',activeCommunity.id,peers);
 }
 async function createCall(type,scope,communityId,peerIds){
  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.RTCPeerConnection){say('المكالمات غير مدعومة في المتصفح الحالي');return;}
@@ -228,7 +228,7 @@ function init(){
  $('community-join-form').addEventListener('submit',joinByCode);
  $('community-message-form').addEventListener('submit',sendCommunityMessage);
  $('community-back').onclick=async function(){if(communityChannel){await db.removeChannel(communityChannel);communityChannel=null;}activeCommunity=null;$('community-room').classList.add('hidden');$('community-list').classList.remove('hidden');};
- $('community-group-call').onclick=startCommunityCall;
+ $('community-group-call').onclick=function(){startCommunityCall('audio');};$('community-group-video-call').onclick=function(){startCommunityCall('video');};
  $('calls-go-chats').onclick=backToChats;
  $('gata-call-audio').onclick=function(){startDirectCall('audio');};
  $('gata-call-video').onclick=function(){startDirectCall('video');};
