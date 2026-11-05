@@ -13,7 +13,7 @@
     if(meta)meta.setAttribute('content',light?'#edf4f8':'#0a1020');
   }
   window.gataToggleTheme=gataTheme;
-  try{if(localStorage.getItem('gata-theme')==='light')document.documentElement.classList.add('gata-start-light');}catch(e){}
+  try{if(localStorage.getItem('gata-theme')!=='dark')document.documentElement.classList.add('gata-start-light');}catch(e){}
   document.addEventListener('DOMContentLoaded',function(){
     if(document.documentElement.classList.contains('gata-start-light'))document.body.classList.add('light');
     var light=document.body.classList.contains('light');
@@ -23,7 +23,7 @@
   });
 })();
 </script><meta name="description" content="جتا آب - محادثاتك في مكان واحد">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata49">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata50">
 <title>جتا آب | GTA App</title>
 </head>
 <body>
