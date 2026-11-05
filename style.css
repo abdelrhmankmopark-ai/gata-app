@@ -666,3 +666,22 @@ body:not(.light) .theme-float{background:#202c33!important;color:#e9edef!importa
  body:not(.light) #bottom-nav .bottom-nav-item.active{color:#25d366!important}
  body:not(.light) #bottom-nav .bottom-nav-item.active .bottom-nav-icon{background:#164f43!important;color:#25d366!important}
 }
+
+
+/* Gata App v56: WhatsApp-like profile presence and message states */
+.conversation-item .presence-avatar{position:relative;overflow:visible!important}
+.conversation-item .presence-avatar>.avatar-image{overflow:hidden;border-radius:inherit}
+.presence-indicator{display:none;position:absolute;right:-1px;bottom:-1px;width:13px;height:13px;border:2.5px solid #202c33;border-radius:50%;background:#25d366;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.presence-avatar.is-online .presence-indicator{display:block}
+body.light .presence-indicator{border-color:#fff}
+#chat-status{display:flex;align-items:center;gap:6px;min-height:18px;font-size:11px;line-height:1.45}
+#chat-status.is-online{color:#25d366!important;font-weight:700}
+#chat-status.is-online:before{content:"";width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#25d366;box-shadow:0 0 0 3px rgba(37,211,102,.13)}
+#chat-status:not(.is-online){color:#8696a0}
+.bubble-meta .read-state{font-size:13px;font-weight:800;letter-spacing:-3px;padding-inline:2px;color:#8696a0;direction:ltr;unicode-bidi:isolate}
+.bubble-meta .read-state.is-read{color:#53bdeb}
+.conversation-item .conversation-info{min-width:0}
+.conversation-item .conversation-preview{max-width:100%;line-height:1.55}
+.conversation-item .conversation-time{font-size:10px;font-weight:600}
+.conversation-item .unread-badge{min-width:19px;height:19px;padding:0 5px;display:inline-flex;align-items:center;justify-content:center;border-radius:20px;background:#25d366;color:#063b2b;font-size:10px;font-weight:800}
+@media(max-width:760px){.conversation-item .presence-indicator{width:12px;height:12px}#chat-status{font-size:10px}}
