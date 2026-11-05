@@ -358,7 +358,7 @@ async function sendMessage(e){
 }
 function subscribeGlobal(){
  if(channel)db.removeChannel(channel);
- channel=db.channel('gata-live-'+user.id)
+ channel=db.channel('gata-live-'+user.id,{config:{private:true}})
  .on('postgres_changes',{event:'*',schema:'public',table:'messages'},function(payload){var m=payload.new||payload.old;if(currentConversation&&m.conversation_id===currentConversation){if(payload.eventType==='INSERT'&&m.sender_id!==user.id){renderMessage(m);if(privacyPref('read-receipts',true))db.from('message_reads').upsert({message_id:m.id,reader_id:user.id},{onConflict:'message_id,reader_id',ignoreDuplicates:true});$('messages').scrollTop=$('messages').scrollHeight;}else if(payload.eventType==='UPDATE'){var el=document.querySelector('[data-id="'+m.id+'"]');if(el&&!isMedia(m.content)){var body=el.firstElementChild;if(body)body.textContent=m.content;}}else if(payload.eventType==='DELETE'){var el=document.querySelector('[data-id="'+m.id+'"]');if(el)el.remove();}}loadConversations();})
  .on('postgres_changes',{event:'*',schema:'public',table:'message_reads'},function(payload){var m=payload.new||payload.old;var el=document.querySelector('[data-id="'+m.message_id+'"] .read-state');if(el&&privacyPref('read-receipts',true))el.textContent='✓✓';})
  .on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},function(){refreshPeerStatus();})
