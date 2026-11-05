@@ -449,12 +449,16 @@ function showChats(){
  var workspace=$('chat-view').querySelector('.workspace');
  workspace.classList.remove('hidden');
  $('updates-panel').classList.add('hidden');
+ if($('communities-panel'))$('communities-panel').classList.add('hidden');
+ if($('calls-panel'))$('calls-panel').classList.add('hidden');
  workspace.classList.remove('chat-open');
  if(location.hash==='#chat'){try{history.replaceState({},' ',location.pathname+location.search);}catch(e){}}
 }
 function showUpdates(){
  var workspace=$('chat-view').querySelector('.workspace');
  if(workspace)workspace.classList.add('hidden');
+ if($('communities-panel'))$('communities-panel').classList.add('hidden');
+ if($('calls-panel'))$('calls-panel').classList.add('hidden');
  $('updates-panel').classList.remove('hidden');
  closeTopMenu();
 }
