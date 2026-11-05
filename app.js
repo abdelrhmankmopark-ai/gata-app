@@ -353,6 +353,36 @@ function setMessageReply(m){
  bar.classList.remove('hidden');$('message-input').focus();
 }
 function clearMessageReply(){messageReplyDraft=null;var bar=$('reply-compose-bar');if(bar)bar.classList.add('hidden');}
+async function toggleMessageReaction(messageId,emoji){
+ var current=await db.from('message_reactions').select('emoji').eq('message_id',messageId).eq('user_id',user.id).maybeSingle();
+ if(current.error){toast('تعذر قراءة التفاعل');return;}
+ var result;
+ if(current.data&&current.data.emoji===emoji){result=await db.from('message_reactions').delete().eq('message_id',messageId).eq('user_id',user.id);}
+ else{result=await db.from('message_reactions').upsert({message_id:messageId,user_id:user.id,emoji:emoji},{onConflict:'message_id,user_id'});}
+ if(result.error){toast('تعذر حفظ التفاعل: '+result.error.message);return;}
+ await refreshMessageReactions(messageId);
+}
+async function refreshMessageReactions(messageId){
+ var bubble=document.querySelector('.bubble[data-id="'+messageId+'"]');if(!bubble)return;
+ var result=await db.from('message_reactions').select('user_id,emoji').eq('message_id',messageId);
+ if(result.error)return;
+ var area=bubble.querySelector('.message-reactions');
+ if(!area){area=document.createElement('div');area.className='message-reactions';bubble.appendChild(area);}
+ area.innerHTML='';
+ var counts={};
+ (result.data||[]).forEach(function(row){if(!counts[row.emoji])counts[row.emoji]={count:0,mine:false};counts[row.emoji].count++;if(row.user_id===user.id)counts[row.emoji].mine=true;});
+ Object.keys(counts).forEach(function(emoji){
+  var item=document.createElement('button');item.type='button';item.className='reaction-chip'+(counts[emoji].mine?' mine-reaction':'');item.textContent=emoji+' '+counts[emoji].count;item.title=counts[emoji].mine?'إزالة تفاعلك':'التفاعل بـ '+emoji;
+  item.addEventListener('click',function(){toggleMessageReaction(messageId,emoji);});area.appendChild(item);
+ });
+ var add=document.createElement('button');add.type='button';add.className='reaction-add';add.textContent='☺';add.title='إضافة تفاعل';area.appendChild(add);
+ var tray=document.createElement('div');tray.className='reaction-tray hidden';
+ ['❤️','😂','👍','😮','😢','🙏'].forEach(function(emoji){
+  var pick=document.createElement('button');pick.type='button';pick.textContent=emoji;pick.title='تفاعل '+emoji;pick.addEventListener('click',function(){toggleMessageReaction(messageId,emoji);});tray.appendChild(pick);
+ });
+ area.appendChild(tray);
+ add.addEventListener('click',function(){tray.classList.toggle('hidden');});
+}
 async function renderMessage(m){
  var box=$('messages'),div=document.createElement('div');div.className='bubble'+(m.sender_id===user.id?' mine':'');div.dataset.id=m.id;box.appendChild(div);
  var body=document.createElement('div'),replyData=decodeReplyContent(m.content),plainContent=replyData?String(replyData.text||''):m.content,media=isMedia(m.content);
@@ -360,7 +390,7 @@ async function renderMessage(m){
  else if(!replyData)body.textContent=m.content;
  var meta=document.createElement('div');meta.className='bubble-meta';var time=document.createElement('span');time.textContent=dateLabel(m.created_at);meta.appendChild(time);
  if(m.sender_id===user.id&&privacyPref('read-receipts',true)){var read=await db.from('message_reads').select('message_id').eq('message_id',m.id).neq('reader_id',user.id);var rs=document.createElement('span');rs.className='read-state';rs.textContent=read.data&&read.data.length?'✓✓':'✓';meta.appendChild(rs);}
- if(!media){var copy=document.createElement('button');copy.className='message-delete';copy.type='button';copy.textContent='نسخ';copy.title='نسخ الرسالة';copy.addEventListener('click',async function(){try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(replyData?plainContent:String(m.content||''));}else{var ta=document.createElement('textarea');ta.value=String(m.content||'');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}toast('تم نسخ الرسالة');}catch(err){toast('تعذر نسخ الرسالة');}});meta.appendChild(copy);if(m.sender_id===user.id&&!replyData){var edit=document.createElement('button');edit.className='message-delete';edit.type='button';edit.textContent='تعديل';edit.title='تعديل الرسالة';edit.addEventListener('click',async function(){var next=prompt('عدّل نص الرسالة:',String(m.content||''));if(next===null)return;next=next.trim();if(!next){toast('الرسالة لا يمكن أن تكون فارغة');return;}if(next.length>4000){toast('الرسالة أطول من المسموح');return;}var upd=await db.from('messages').update({content:next}).eq('id',m.id).eq('sender_id',user.id).select().single();if(upd.error){toast('تعذر تعديل الرسالة: '+upd.error.message);return;}m.content=next;body.textContent=next;toast('تم تعديل الرسالة');});meta.appendChild(edit);}}var replyBtn=document.createElement('button');replyBtn.className='message-delete';replyBtn.type='button';replyBtn.textContent='رد';replyBtn.title='الرد على الرسالة';replyBtn.addEventListener('click',function(){setMessageReply(m);});meta.appendChild(replyBtn);var del=document.createElement('button');del.className='message-delete';del.type='button';del.textContent='حذف';del.title='حذف للطرفين';del.addEventListener('click',async function(){if(!confirm('حذف الرسالة من عندك وعند الطرف الآخر؟'))return;var d=await db.from('messages').delete().eq('id',m.id);if(d.error)toast('تعذر حذف الرسالة: '+d.error.message);});meta.appendChild(del);div.appendChild(body);div.appendChild(meta);
+ if(!media){var copy=document.createElement('button');copy.className='message-delete';copy.type='button';copy.textContent='نسخ';copy.title='نسخ الرسالة';copy.addEventListener('click',async function(){try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(replyData?plainContent:String(m.content||''));}else{var ta=document.createElement('textarea');ta.value=String(m.content||'');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}toast('تم نسخ الرسالة');}catch(err){toast('تعذر نسخ الرسالة');}});meta.appendChild(copy);if(m.sender_id===user.id&&!replyData){var edit=document.createElement('button');edit.className='message-delete';edit.type='button';edit.textContent='تعديل';edit.title='تعديل الرسالة';edit.addEventListener('click',async function(){var next=prompt('عدّل نص الرسالة:',String(m.content||''));if(next===null)return;next=next.trim();if(!next){toast('الرسالة لا يمكن أن تكون فارغة');return;}if(next.length>4000){toast('الرسالة أطول من المسموح');return;}var upd=await db.from('messages').update({content:next}).eq('id',m.id).eq('sender_id',user.id).select().single();if(upd.error){toast('تعذر تعديل الرسالة: '+upd.error.message);return;}m.content=next;body.textContent=next;toast('تم تعديل الرسالة');});meta.appendChild(edit);}}var replyBtn=document.createElement('button');replyBtn.className='message-delete';replyBtn.type='button';replyBtn.textContent='رد';replyBtn.title='الرد على الرسالة';replyBtn.addEventListener('click',function(){setMessageReply(m);});meta.appendChild(replyBtn);var del=document.createElement('button');del.className='message-delete';del.type='button';del.textContent='حذف';del.title='حذف للطرفين';del.addEventListener('click',async function(){if(!confirm('حذف الرسالة من عندك وعند الطرف الآخر؟'))return;var d=await db.from('messages').delete().eq('id',m.id);if(d.error)toast('تعذر حذف الرسالة: '+d.error.message);});meta.appendChild(del);div.appendChild(body);div.appendChild(meta);refreshMessageReactions(m.id);
 }
 async function sendMessage(e){
  e.preventDefault();var input=$('message-input'),textContent=input.value.trim();if(!textContent||!currentConversation)return;var content=messageReplyDraft?'GATA_REPLY:'+JSON.stringify({replyTo:messageReplyDraft.id,sender:messageReplyDraft.sender,quote:messageReplyDraft.text,text:textContent}):textContent;
@@ -372,6 +402,7 @@ function subscribeGlobal(){
  if(channel)db.removeChannel(channel);
  channel=db.channel('gata-live-'+user.id,{config:{private:true}})
  .on('postgres_changes',{event:'*',schema:'public',table:'messages'},function(payload){var m=payload.new||payload.old;if(currentConversation&&m.conversation_id===currentConversation){if(payload.eventType==='INSERT'&&m.sender_id!==user.id){renderMessage(m);if(privacyPref('read-receipts',true))db.from('message_reads').upsert({message_id:m.id,reader_id:user.id},{onConflict:'message_id,reader_id',ignoreDuplicates:true});$('messages').scrollTop=$('messages').scrollHeight;}else if(payload.eventType==='UPDATE'){var el=document.querySelector('[data-id="'+m.id+'"]');if(el&&!isMedia(m.content)){var body=el.firstElementChild;if(body)body.textContent=m.content;}}else if(payload.eventType==='DELETE'){var el=document.querySelector('[data-id="'+m.id+'"]');if(el)el.remove();}}loadConversations();})
+ .on('postgres_changes',{event:'*',schema:'public',table:'message_reactions'},function(payload){var row=payload.new||payload.old;if(row&&currentConversation)refreshMessageReactions(row.message_id);})
  .on('postgres_changes',{event:'*',schema:'public',table:'message_reads'},function(payload){var m=payload.new||payload.old;var el=document.querySelector('[data-id="'+m.message_id+'"] .read-state');if(el&&privacyPref('read-receipts',true))el.textContent='✓✓';})
  .on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},function(){refreshPeerStatus();})
  .subscribe();
