@@ -313,7 +313,7 @@ async function openConversation(id,peerId,name){
  $('chat-name').textContent=name||'محادثة';$('chat-avatar').textContent=initials(name);if(currentPeer){var pa=await db.from('profiles').select('avatar_url').eq('id',currentPeer).maybeSingle();setAvatar($('chat-avatar'),pa.data&&pa.data.avatar_url);}else setAvatar($('chat-avatar'),null);$('chat-person').onclick=function(){if(currentPeer)showPublicProfile(currentPeer);};$('chat-avatar').onclick=function(){if(currentPeer)showPublicProfile(currentPeer);};
  await refreshPeerStatus();await loadMessages();await loadConversations();
 }
-async async function refreshPeerStatus(){
+async function refreshPeerStatus(){
  var status=$('chat-status');if(!currentPeer){status.textContent=tr('offline');status.classList.remove('is-online');return;}
  var r=await db.from('profiles').select('last_seen').eq('id',currentPeer).maybeSingle();
  var lastSeen=r.data&&r.data.last_seen,online=isPeerOnline(lastSeen);
