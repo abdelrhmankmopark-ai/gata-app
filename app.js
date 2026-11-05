@@ -306,7 +306,7 @@ async function showPublicProfile(profileId){var panel=$('public-profile-view');p
 async function openConversation(id,peerId,name){
  var workspace=$('chat-view').querySelector('.workspace');
  if(!workspace.classList.contains('chat-open')){try{history.pushState({gataChat:true},'','#chat');}catch(e){}}
- workspace.classList.add('chat-open');
+ workspace.classList.add('chat-open');document.body.classList.add('gata-chat-screen');
  currentConversation=id;currentPeer=peerId;window.gataCurrentPeerId=peerId;$('welcome-panel').classList.add('hidden');$('active-chat').classList.remove('hidden');
  $('chat-name').textContent=name||'محادثة';$('chat-avatar').textContent=initials(name);if(currentPeer){var pa=await db.from('profiles').select('avatar_url').eq('id',currentPeer).maybeSingle();setAvatar($('chat-avatar'),pa.data&&pa.data.avatar_url);}else setAvatar($('chat-avatar'),null);$('chat-person').onclick=function(){if(currentPeer)showPublicProfile(currentPeer);};$('chat-avatar').onclick=function(){if(currentPeer)showPublicProfile(currentPeer);};
  await refreshPeerStatus();await loadMessages();await loadConversations();
@@ -451,7 +451,7 @@ function showChats(){
  $('updates-panel').classList.add('hidden');
  if($('communities-panel'))$('communities-panel').classList.add('hidden');
  if($('calls-panel'))$('calls-panel').classList.add('hidden');
- workspace.classList.remove('chat-open');
+ workspace.classList.remove('chat-open');document.body.classList.remove('gata-chat-screen');
  if(location.hash==='#chat'){try{history.replaceState({},' ',location.pathname+location.search);}catch(e){}}
 }
 function showUpdates(){
