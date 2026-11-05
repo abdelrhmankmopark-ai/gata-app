@@ -650,3 +650,19 @@ body:not(.light) .theme-float{background:#202c33!important;color:#e9edef!importa
 .chat-call-actions button svg{display:block;width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .chat-call-actions button:active{background:#e9edef!important}
 @media(max-width:759px){.chat-call-actions button{width:36px;height:36px;padding:7px}.chat-call-actions button svg{width:22px;height:22px}}
+
+/* GATA v52 — WhatsApp-style bottom navigation */
+@media(max-width:759px){
+ #bottom-nav.bottom-nav{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;gap:2px;padding:7px 10px calc(7px + env(safe-area-inset-bottom))!important;background:#fff!important;border-top:1px solid #e9edef!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ #bottom-nav .bottom-nav-item{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;min-width:0!important;min-height:66px!important;padding:3px 2px!important;border:0!important;border-radius:12px!important;background:transparent!important;color:#667781!important;font-size:11px!important;font-weight:500!important;line-height:1.2!important}
+ #bottom-nav .bottom-nav-icon{display:grid!important;place-items:center!important;width:64px!important;min-width:64px!important;height:36px!important;padding:0!important;border-radius:22px!important;background:transparent!important;color:#54656f!important;font-size:0!important}
+ #bottom-nav .bottom-nav-icon svg{display:block!important;width:24px!important;height:24px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.9!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+ #bottom-nav .bottom-nav-item.active{color:#008f75!important;font-weight:700!important}
+ #bottom-nav .bottom-nav-item.active .bottom-nav-icon{background:#d9fdd3!important;color:#008f75!important}
+ #bottom-nav .bottom-nav-item:active{transform:scale(.98)}
+ body:not(.light) #bottom-nav.bottom-nav{background:#202c33!important;border-color:#2a3942!important}
+ body:not(.light) #bottom-nav .bottom-nav-item{color:#aebac1!important}
+ body:not(.light) #bottom-nav .bottom-nav-icon{color:#aebac1!important}
+ body:not(.light) #bottom-nav .bottom-nav-item.active{color:#25d366!important}
+ body:not(.light) #bottom-nav .bottom-nav-item.active .bottom-nav-icon{background:#164f43!important;color:#25d366!important}
+}
