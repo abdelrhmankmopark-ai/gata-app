@@ -243,7 +243,7 @@ function init(){
    callsFeed=db.channel('call-invitations-'+me.id,{config:{private:true}}).on('postgres_changes',{event:'INSERT',schema:'public',table:'call_participants',filter:'user_id=eq.'+me.id},function(payload){handleIncoming(payload.new);}).subscribe();
   }
  });
- db.auth.getSession().then(function(r){me=r.data.session&&r.data.session.user||window.gataUser||null;if(me&&!callsFeed){callsFeed=db.channel('call-invitations-'+me.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'call_participants',filter:'user_id=eq.'+me.id},function(payload){handleIncoming(payload.new);}).subscribe();}});
+ db.auth.getSession().then(function(r){me=r.data.session&&r.data.session.user||window.gataUser||null;if(me&&!callsFeed){callsFeed=db.channel('call-invitations-'+me.id,{config:{private:true}}).on('postgres_changes',{event:'INSERT',schema:'public',table:'call_participants',filter:'user_id=eq.'+me.id},function(payload){handleIncoming(payload.new);}).subscribe();}});
 }
 document.addEventListener('DOMContentLoaded',init);
 })();
