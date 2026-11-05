@@ -23,7 +23,7 @@
   });
 })();
 </script><meta name="description" content="جتا آب - محادثاتك في مكان واحد">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata44">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=gata46">
 <title>جتا آب | GTA App</title>
 </head>
 <body>
@@ -75,13 +75,61 @@
       <section class="conversation glass">
         <div id="welcome-panel" class="welcome-panel"><div class="welcome-logo">G</div><h2>أهلاً بيك في جتا آب</h2><p>ابدأ محادثة جديدة وابحث عن أصحابك باسم المستخدم.</p><button class="primary-btn" id="welcome-new-chat">ابدأ محادثة</button></div>
         <div id="active-chat" class="active-chat hidden">
-          <header class="chat-header"><button id="back-to-chats" class="back-to-chats" type="button" aria-label="العودة للمحادثات" title="العودة للمحادثات">→</button><div id="chat-avatar" class="avatar">G</div><div id="chat-person" class="chat-person" role="button" tabindex="0" aria-label="فتح الملف الشخصي"><strong id="chat-name">محادثة</strong><span id="chat-status" class="muted">غير متصل</span></div></header>
+          <header class="chat-header"><button id="back-to-chats" class="back-to-chats" type="button" aria-label="العودة للمحادثات" title="العودة للمحادثات">→</button><div id="chat-avatar" class="avatar">G</div><div id="chat-person" class="chat-person" role="button" tabindex="0" aria-label="فتح الملف الشخصي"><strong id="chat-name">محادثة</strong><span id="chat-status" class="muted">غير متصل</span></div><div class="chat-call-actions"><button id="gata-call-audio" type="button" aria-label="مكالمة صوتية" title="مكالمة صوتية">☎</button><button id="gata-call-video" type="button" aria-label="مكالمة فيديو" title="مكالمة فيديو">▣</button></div></header>
           <div id="messages" class="messages" aria-live="polite"></div>
           <div id="reply-compose-bar" class="reply-compose-bar hidden"><div><strong id="reply-compose-name">الرد على رسالة</strong><span id="reply-compose-text"></span></div><button id="cancel-message-reply" type="button" aria-label="إلغاء الرد">×</button></div><form id="message-form" class="message-form"><button type="button" id="attach-image-btn" class="tool-btn" title="إرسال صورة">▧</button><button type="button" id="record-audio-btn" class="tool-btn" title="تسجيل صوت">🎙</button><input id="message-input" maxlength="4000" autocomplete="off" placeholder="اكتب رسالتك..." aria-label="اكتب رسالتك"><button type="submit" class="send-btn" aria-label="إرسال">➤</button><input id="image-file-input" type="file" accept="image/jpeg,image/png,image/webp" class="file-picker"></form>
         </div>
       </section>
     </div>
       <section id="updates-panel" class="updates-panel hidden"><div class="updates-panel-heading"><h2>التحديثات</h2><p>شارك صورة أو فيديو أو نص أو تسجيل صوتي لمدة 24 ساعة</p></div><section class="status-composer glass"><div class="status-composer-title"><strong>أضف حالة جديدة</strong><span>تختفي بعد 24 ساعة</span></div><textarea id="quick-status-text" maxlength="80" rows="2" placeholder="اكتب حالة نصية..."></textarea><div class="status-compose-actions"><button id="publish-text-status" class="primary-btn" type="button">نشر النص</button><button id="pick-image-status" type="button">📷 صورة</button><button id="pick-video-status" type="button">🎬 فيديو</button><button id="record-status-audio" type="button">🎙 تسجيل صوتي</button></div><small id="status-compose-note" class="status-compose-note">النص حتى 80 حرفًا · الصورة 5MB · الفيديو والصوت 25MB</small><input id="status-media-input" class="file-picker" type="file" accept="image/jpeg,image/png,image/webp" /><input id="status-video-input" class="file-picker" type="file" accept="video/mp4,video/webm" /></section><section id="friend-statuses" class="friend-statuses" aria-label="حالات الأصدقاء"><div class="friend-statuses-heading">الحالات</div><div id="friend-status-list" class="friend-status-list"><div class="status-loading">جاري تحميل الحالات...</div></div></section></section>
+
+      <section id="communities-panel" class="feature-panel hidden">
+        <div class="feature-heading"><div><h2>المجتمعات</h2><p>اجمع أصحابك في مكان واحد</p></div><span class="feature-mark">♧</span></div>
+        <div class="feature-card glass">
+          <h3>إنشاء مجتمع جديد</h3>
+          <form id="community-create-form" class="feature-form">
+            <input id="community-name" maxlength="50" minlength="2" required placeholder="اسم المجتمع">
+            <textarea id="community-description" maxlength="240" rows="2" placeholder="وصف مختصر للمجتمع (اختياري)"></textarea>
+            <button class="primary-btn" type="submit">＋ إنشاء المجتمع</button>
+          </form>
+        </div>
+        <div class="feature-card glass">
+          <h3>الانضمام بكود دعوة</h3>
+          <form id="community-join-form" class="feature-form inline">
+            <input id="community-code" maxlength="10" required placeholder="كود الدعوة">
+            <button class="primary-btn" type="submit">انضمام</button>
+          </form>
+        </div>
+        <div id="community-list" class="feature-list"><p class="muted">جاري تحميل المجتمعات...</p></div>
+        <div id="community-room" class="community-room glass hidden">
+          <div class="community-room-head"><button id="community-back" type="button">→ رجوع</button><div><strong id="community-room-name">المجتمع</strong><small id="community-room-meta"></small></div><button id="community-group-call" type="button" title="مكالمة جماعية">☎</button></div>
+          <div id="community-messages" class="community-messages"></div>
+          <form id="community-message-form" class="community-message-form"><input id="community-message-input" maxlength="2000" placeholder="اكتب رسالة للمجتمع..." required><button type="submit">➤</button></form>
+          <p id="community-invite-code" class="community-invite-code"></p>
+        </div>
+      </section>
+      <section id="calls-panel" class="feature-panel hidden">
+        <div class="feature-heading"><div><h2>المكالمات</h2><p>سجل مكالماتك وابدأ مكالمة من أي محادثة</p></div><span class="feature-mark">☎</span></div>
+        <div class="feature-card glass"><h3>بدء مكالمة فردية</h3><p>افتح دردشة الشخص واضغط زر الصوت أو الفيديو أعلى المحادثة.</p><button id="calls-go-chats" class="primary-btn" type="button">الانتقال إلى الدردشات</button></div>
+        <div id="call-history" class="feature-list"><p class="muted">سجل المكالمات هيظهر هنا.</p></div>
+      </section>
+      <div id="call-overlay" class="call-overlay hidden" role="dialog" aria-modal="true" aria-label="المكالمة">
+        <div class="call-card glass">
+          <div class="call-state" id="call-state">جاري الاتصال...</div>
+          <div class="call-avatar" id="call-avatar">G</div>
+          <h2 id="call-title">مكالمة جتا آب</h2>
+          <p id="call-subtitle">يرجى الانتظار</p>
+          <div id="call-media-stage" class="call-media-stage"><video id="call-remote-video" autoplay playsinline></video><video id="call-local-video" autoplay muted playsinline></video><audio id="call-remote-audio" autoplay></audio></div>
+          <div class="call-controls">
+            <button id="call-mute" type="button">🎙 كتم</button>
+            <button id="call-camera" type="button">📷 كاميرا</button>
+            <button id="call-decline" class="danger-action" type="button">رفض</button>
+            <button id="call-hangup" class="danger-action hidden" type="button">إنهاء</button>
+            <button id="call-accept" class="primary-btn hidden" type="button">قبول المكالمة</button>
+          </div>
+          <p id="call-note" class="call-note">المكالمة تستخدم الإنترنت والميكروفون أو الكاميرا بعد موافقتك.</p>
+        </div>
+      </div>
     <nav id="bottom-nav" class="bottom-nav" aria-label="التنقل الرئيسي">
         <button class="bottom-nav-item" type="button" data-nav="calls"><span class="bottom-nav-icon" aria-hidden="true">☎</span><span>المكالمات</span></button>
         <button class="bottom-nav-item" type="button" data-nav="communities"><span class="bottom-nav-icon" aria-hidden="true">♧</span><span>المجتمعات</span></button>
@@ -151,5 +199,5 @@
  </div>
 </div>
 <div id="status-viewer" class="status-viewer hidden" role="dialog" aria-modal="true" aria-label="عرض الحالة"><div id="status-viewer-progress" class="status-viewer-progress" aria-hidden="true"></div><button id="status-viewer-prev" class="status-viewer-nav prev" type="button" aria-label="الحالة السابقة">‹</button><button id="status-viewer-next" class="status-viewer-nav next" type="button" aria-label="الحالة التالية">›</button><button id="close-status-viewer" class="status-viewer-close" type="button" aria-label="إغلاق">×</button><div class="status-viewer-card"><div id="status-viewer-owner" class="status-viewer-owner"></div><div id="status-viewer-content" class="status-viewer-content"></div><div id="status-viewer-time" class="status-viewer-time"></div><button id="reply-status-btn" class="primary-btn status-reply-btn hidden" type="button">↩ رد على الحالة</button><button id="delete-my-status" class="danger-action hidden" type="button">حذف حالتي</button></div></div><div id="toast" class="toast" role="status"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata45"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=gata46"></script><script src="features.js?v=gata46"></script>
 </body></html>
