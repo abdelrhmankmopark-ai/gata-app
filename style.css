@@ -644,3 +644,9 @@ body:not(.light) .theme-float{background:#202c33!important;color:#e9edef!importa
  .bottom-nav-icon{min-width:48px!important;height:27px!important;font-size:23px!important}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* GATA v51 — clean WhatsApp-style call icons in chat header */
+.chat-call-actions button{display:grid;place-items:center;width:40px;height:40px;padding:8px;border:0!important;border-radius:50%!important;background:transparent!important;color:#54656f!important}
+.chat-call-actions button svg{display:block;width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chat-call-actions button:active{background:#e9edef!important}
+@media(max-width:759px){.chat-call-actions button{width:36px;height:36px;padding:7px}.chat-call-actions button svg{width:22px;height:22px}}
