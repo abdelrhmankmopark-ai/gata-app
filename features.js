@@ -119,7 +119,7 @@ async function createCall(type,scope,communityId,peerIds){
  if(r.error){say('تعذر إنشاء المكالمة: '+r.error.message);return;}
  var rows=unique.map(function(id){return{call_id:r.data.id,user_id:id,status:id===me.id?'joined':'invited',joined_at:id===me.id?new Date().toISOString():null};});
  var p=await db.from('call_participants').insert(rows);
- if(p.error){await db.from('call_sessions').delete().eq('id',r.data.id);say('تعذر دعوة المشاركين: '+p.error.message);return;}
+ if(p.error){await db.from('call_sessions').update({status:'ended',ended_at:new Date().toISOString()}).eq('id',r.data.id);say('تعذر دعوة المشاركين: '+p.error.message);return;}
  await joinCall(r.data,type,false);
 }
 async function handleIncoming(row){
@@ -146,10 +146,10 @@ async function joinCall(c,type,isIncoming){
   $('call-camera').classList.toggle('hidden',type!=='video');
   callChannel=db.channel('call:'+c.id,{config:{private:true,broadcast:{ack:true}}});
   callChannel.on('broadcast',{event:'signal'},function(message){handleSignal(message.payload||message);});
+  callChannel.on('postgres_changes',{event:'*',schema:'public',table:'call_participants',filter:'call_id=eq.'+c.id},function(){syncCallPeers();});
   await new Promise(function(resolve,reject){
    callChannel.subscribe(function(status,err){if(status==='SUBSCRIBED')resolve();else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')reject(err||new Error('تعذر الاتصال بقناة المكالمة'));});
   });
-  callChannel.on('postgres_changes',{event:'*',schema:'public',table:'call_participants',filter:'call_id=eq.'+c.id},function(){syncCallPeers();});
   await db.from('call_sessions').update({status:'active'}).eq('id',c.id).eq('created_by',c.created_by);
   $('call-state').textContent='متصل — في انتظار المشاركين';
   await syncCallPeers();
