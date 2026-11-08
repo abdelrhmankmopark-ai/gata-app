@@ -707,3 +707,25 @@ body:not(.light) .archived-toggle,body:not(.light) .notification-enable{backgrou
 
 .copy-profile-handle{margin:8px auto 0;padding:7px 13px;border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--accent2);font:inherit;font-size:11px;font-weight:700}
 .copy-profile-handle:active{transform:scale(.97)}
+
+
+/* GTA v61 — user directory and friend requests */
+.friend-directory-tools{display:grid;gap:12px;margin:10px 0 18px}
+.friend-directory-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.friend-tab{min-width:0;padding:11px 7px;border:1px solid var(--line);border-radius:13px;background:var(--panel);color:var(--muted);font:inherit;font-size:12px;font-weight:750}
+.friend-tab.active{background:rgba(141,242,220,.16);border-color:#54cdb1;color:var(--text)}
+.friend-directory-tools input{box-sizing:border-box;width:100%;min-height:46px;padding:11px 13px;border:1px solid var(--line);border-radius:13px;background:var(--input-bg,var(--panel));color:var(--text);font:inherit;outline:none}
+.friend-user-row{gap:11px;align-items:center}
+.friend-user-row>.avatar{flex:0 0 45px;width:45px;height:45px}
+.friend-user-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+.friend-user-actions button{font:inherit;font-size:11px;padding:8px 10px;white-space:nowrap}
+.friend-user-actions button:disabled{opacity:.65;cursor:default}
+.friend-secondary-btn{border:1px solid var(--line);border-radius:11px;background:transparent;color:var(--muted)}
+@media(max-width:480px){
+ .friend-user-row{flex-wrap:wrap}
+ .friend-user-row .feature-row-main{flex:1}
+ .friend-user-actions{width:100%;padding-inline-start:56px;justify-content:flex-start}
+ .friend-user-actions button{flex:1}
+ .friend-directory-tabs{gap:5px}
+ .friend-tab{font-size:10px;padding:10px 4px}
+}
