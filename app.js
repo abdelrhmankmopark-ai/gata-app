@@ -680,5 +680,28 @@ function initEvents(){
 }
 async function boot(){initEvents();applyTheme();applyLanguage();var s=await db.auth.getSession();if(s.data.session){user=s.data.session.user;try{await enterApp();}catch(e){showAuth('login');note('تعذر تحميل الحساب: '+e.message);}}else showAuth('login');}
 document.addEventListener('DOMContentLoaded',boot);
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}
+if('serviceWorker' in navigator){
+ window.addEventListener('load',function(){
+  var hadController=!!navigator.serviceWorker.controller;
+  var reloadPending=false,reloading=false;
+  function reloadForUpdate(){
+   if(reloading)return;
+   var input=document.getElementById('message-input');
+   if(input&&input.value.trim()){reloadPending=true;return;}
+   reloading=true;window.location.reload();
+  }
+  navigator.serviceWorker.addEventListener('controllerchange',function(){
+   if(!hadController){hadController=true;return;}
+   reloadForUpdate();
+  });
+  var input=document.getElementById('message-input');
+  if(input)input.addEventListener('input',function(){if(reloadPending&&!this.value.trim())reloadForUpdate();});
+  navigator.serviceWorker.register('./sw.js?v=63',{updateViaCache:'none'}).then(function(reg){
+   function checkForUpdate(){if(document.visibilityState==='hidden')return;reg.update().catch(function(){});}
+   checkForUpdate();
+   window.setInterval(checkForUpdate,30000);
+   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')checkForUpdate();});
+  }).catch(function(){});
+ });
+}
 })();
