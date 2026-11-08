@@ -446,11 +446,28 @@ async function openContacts(){
 }
 async function searchUsers(e){
  e.preventDefault();var term=$('user-search').value.trim().replace(/^@/,'').toLowerCase();if(term.length<8){toast('اسم المستخدم لازم يكون 8 أحرف على الأقل');return;}
- var r=await db.from('profiles').select('id,username,display_name').eq('username',term).neq('id',user.id).limit(10);
+ var r=await db.from('profiles').select('id,username,display_name,avatar_url').eq('username',term).neq('id',user.id).limit(10);
  var box=$('search-results');box.innerHTML='';
  if(r.error){box.textContent='تعذر البحث: '+r.error.message;return;}
  if(!r.data.length){box.textContent=tr('noResults');return;}
- r.data.forEach(function(p){var row=document.createElement('div');row.className='result-user';row.innerHTML='<div class="avatar">'+safe(initials(p.display_name||p.username))+'</div><div><strong>'+safe(p.display_name||p.username)+'</strong><div class="muted">@'+safe(p.username)+'</div></div><button class="primary-btn">مراسلة</button>';row.querySelector('button').addEventListener('click',function(){startDirectChat(p);});box.appendChild(row);});
+ var ids=r.data.map(function(p){return p.id;});
+ var q=await db.from('friend_requests').select('id,sender_id,receiver_id,status').or('sender_id.eq.'+user.id+',receiver_id.eq.'+user.id);
+ if(q.error){box.textContent='تعذر تحميل حالة طلب الصداقة: '+q.error.message;return;}
+ r.data.forEach(function(p){
+  var name=p.display_name||p.username,rel=(q.data||[]).filter(function(x){return (x.sender_id===user.id&&x.receiver_id===p.id)||(x.sender_id===p.id&&x.receiver_id===user.id);});
+  var accepted=rel.some(function(x){return x.status==='accepted';});
+  var incoming=rel.find(function(x){return x.sender_id===p.id&&x.receiver_id===user.id&&x.status==='pending';});
+  var outgoing=rel.find(function(x){return x.sender_id===user.id&&x.receiver_id===p.id;});
+  var row=document.createElement('div');row.className='result-user';row.innerHTML=avatarHTML(p.avatar_url,name)+'<div class="contact-details"><strong>'+safe(name)+'</strong><div class="muted">@'+safe(p.username)+'</div></div><div class="friend-user-actions"></div>';
+  var actions=row.querySelector('.friend-user-actions');
+  function action(label,fn,disabled){var b=document.createElement('button');b.type='button';b.className='primary-btn';b.textContent=label;b.disabled=!!disabled;b.onclick=fn;actions.appendChild(b);}
+  if(accepted)action('مراسلة',function(){startDirectChat(p);});
+  else if(incoming)action('قبول',function(){respondToFriendRequest(incoming.id,'accepted');});
+  else if(outgoing&&outgoing.status==='pending')action('تم إرسال الطلب',function(){},true);
+  else if(outgoing&&outgoing.status==='rejected')action('إعادة الطلب',function(){sendFriendRequest(p,outgoing);});
+  else action('طلب صداقة',function(){sendFriendRequest(p,null);});
+  box.appendChild(row);
+ });
 }
 async function startDirectChat(peer){
  if(!user||!peer||!peer.id||peer.id===user.id){toast('اختار حسابًا صحيحًا لبدء المحادثة');return;}
