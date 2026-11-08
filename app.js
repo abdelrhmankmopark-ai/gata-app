@@ -7,6 +7,7 @@ var db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);window.gataDB=db;
 var user=null,currentConversation=null,currentPeer=null,channel=null,heartbeat=null,mediaRecorder=null,recordedChunks=[],profileData=null,language=localStorage.getItem('gata-language')||'ar';
 var statusViewerProfiles=[],statusViewerIndex=0,statusReplyPeer=null,statusReplyContext='',messageReplyDraft=null;
 var typingChannel=null,typingTimer=null,selectionMode=false,selectedMessageIds=new Set(),showArchivedChats=false;
+var usersDirectoryCache=[],friendRequestsCache=[],usersDirectoryTab='all';
 function archivedChatIds(){try{return JSON.parse(localStorage.getItem('gata-archived-'+(user&&user.id||'guest'))||'[]');}catch(e){return [];}}
 function setChatArchived(id,archived){var ids=archivedChatIds().filter(function(x){return x!==id;});if(archived)ids.push(id);try{localStorage.setItem('gata-archived-'+user.id,JSON.stringify(ids));}catch(e){toast('تعذر حفظ الأرشفة على الجهاز');return;}loadConversations();}
 function notifyIncomingMessage(m){if(!m||m.sender_id===user.id)return;var mode=localStorage.getItem('gata-browser-notifications')==='on';if(!mode||!('Notification'in window)||Notification.permission!=='granted')return;if(document.visibilityState==='visible'&&currentConversation===m.conversation_id)return;var body=isMedia(m.content)?'وصلك مرفق جديد':String(m.content||'رسالة جديدة').slice(0,100);try{var n=new Notification('رسالة جديدة - جتا آب',{body:body,icon:'./icon-v55.svg',tag:'gata-'+m.conversation_id});n.onclick=function(){window.focus();n.close();};}catch(e){}}
@@ -417,6 +418,7 @@ function subscribeGlobal(){
  .on('postgres_changes',{event:'*',schema:'public',table:'message_reactions'},function(payload){var row=payload.new||payload.old;if(row&&currentConversation)refreshMessageReactions(row.message_id);})
  .on('postgres_changes',{event:'*',schema:'public',table:'message_reads'},function(payload){var m=payload.new||payload.old;var el=document.querySelector('[data-id="'+m.message_id+'"] .read-state');if(el&&privacyPref('read-receipts',true)){el.textContent='✓✓';el.classList.add('is-read');el.title='تمت القراءة';el.setAttribute('aria-label','تمت القراءة');}})
  .on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles'},function(){refreshPeerStatus();loadConversations();})
+ .on('postgres_changes',{event:'*',schema:'public',table:'friend_requests'},function(){if($('users-panel')&&!$('users-panel').classList.contains('hidden'))loadUsersDirectory();})
  .subscribe();
 }
 function startHeartbeat(){if(heartbeat)clearInterval(heartbeat);heartbeat=setInterval(async function(){if(user&&privacyPref('last-seen',true))await db.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',user.id);if(currentConversation)refreshPeerStatus();},30000);}
@@ -500,12 +502,107 @@ function currentDeviceDetails(){var ua=navigator.userAgent||'',browser='متصف
 async function loadSessionInfo(){var status=$('session-action-status');status.textContent='جاري قراءة معلومات الجلسة الحالية...';var result=await db.auth.getSession();if(result.error){status.textContent='تعذر قراءة الجلسة: '+result.error.message;return;}var session=result.data.session;if(!session){status.textContent='مفيش جلسة دخول نشطة على الجهاز ده.';return;}var device=currentDeviceDetails(),claims=decodeSessionClaims(session.access_token);$('session-device-name').textContent=device.browser;$('session-device-platform').textContent=device.platform;$('session-account').textContent=(session.user&&session.user.email)||'حسابك';$('session-id').textContent=claims.session_id?String(claims.session_id).slice(0,8)+'…'+String(claims.session_id).slice(-4):'غير متاح';$('session-expiry').textContent=session.expires_at?new Date(session.expires_at*1000).toLocaleString('ar-EG',{dateStyle:'medium',timeStyle:'short'}):'غير متاح';status.textContent='دي معلومات جلسة الدخول المفتوحة على الجهاز الحالي.';}
 async function signOutOtherSessions(){var btn=$('signout-other-sessions');if(!confirm('تسجيل الخروج من كل الجلسات الأخرى؟ الجهاز الحالي هيفضل مفتوح، لكن الأجهزة الأخرى هتحتاج تسجل الدخول من جديد.'))return;btn.disabled=true;btn.textContent='جاري إنهاء الجلسات الأخرى...';var result=await db.auth.signOut({scope:'others'});btn.disabled=false;btn.textContent='تسجيل الخروج من الأجهزة الأخرى';if(result.error){$('session-action-status').textContent='تعذر إنهاء الجلسات الأخرى: '+result.error.message;return;}$('session-action-status').textContent='تم طلب إنهاء الجلسات الأخرى. قد تظل رموز الدخول الحالية صالحة لفترة قصيرة حتى تنتهي صلاحيتها.';toast('تم تسجيل الخروج من الجلسات الأخرى');}
 function openFilePicker(input){if(!input)return;try{if(typeof input.showPicker==='function'){input.showPicker();return;}}catch(e){}input.click();}
+
+async function showUsers(){
+ var workspace=$('chat-view').querySelector('.workspace');
+ if(workspace)workspace.classList.add('hidden');
+ ['updates-panel','communities-panel','calls-panel'].forEach(function(id){if($(id))$(id).classList.add('hidden');});
+ $('users-panel').classList.remove('hidden');
+ closeTopMenu();
+ document.querySelectorAll('[data-nav]').forEach(function(b){b.classList.remove('active');b.removeAttribute('aria-current');});
+ await loadUsersDirectory();
+}
+async function loadUsersDirectory(){
+ if(!user)return;
+ var box=$('users-list');
+ box.innerHTML='<p class="muted">جاري تحميل المستخدمين وطلبات الصداقة...</p>';
+ var results=await Promise.all([
+  db.from('profiles').select('id,username,display_name,avatar_url').neq('id',user.id).order('username',{ascending:true}).limit(500),
+  db.from('friend_requests').select('id,sender_id,receiver_id,status,created_at').or('sender_id.eq.'+user.id+',receiver_id.eq.'+user.id).order('created_at',{ascending:false})
+ ]);
+ if(results[0].error){box.textContent='تعذر تحميل المستخدمين: '+results[0].error.message;return;}
+ if(results[1].error){box.textContent='تعذر تحميل طلبات الصداقة: '+results[1].error.message;return;}
+ usersDirectoryCache=results[0].data||[];
+ friendRequestsCache=results[1].data||[];
+ var incoming=friendRequestsCache.filter(function(r){return r.receiver_id===user.id&&r.status==='pending';}).length;
+ var badge=$('users-requests-count');if(badge)badge.textContent=incoming?(' ('+incoming+')'):'';
+ renderUsersDirectory();
+}
+function renderUsersDirectory(){
+ var box=$('users-list');if(!box)return;
+ var term=($('users-search').value||'').trim().replace(/^@/,'').toLowerCase();
+ var pending=friendRequestsCache.filter(function(r){return r.status==='pending';});
+ var list=usersDirectoryCache.filter(function(p){
+  var name=String(p.display_name||'').toLowerCase(),handle=String(p.username||'').toLowerCase();
+  if(term&&name.indexOf(term)<0&&handle.indexOf(term)<0)return false;
+  var rel=friendRequestsCache.filter(function(r){return (r.sender_id===user.id&&r.receiver_id===p.id)||(r.sender_id===p.id&&r.receiver_id===user.id);});
+  var accepted=rel.some(function(r){return r.status==='accepted';});
+  var waiting=rel.some(function(r){return r.status==='pending';});
+  if(usersDirectoryTab==='friends')return accepted;
+  if(usersDirectoryTab==='requests')return waiting;
+  return true;
+ });
+ document.querySelectorAll('[data-users-tab]').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-users-tab')===usersDirectoryTab);});
+ box.innerHTML='';
+ if(!list.length){
+  box.innerHTML='<div class="empty-state">'+(usersDirectoryTab==='friends'?'لسه مفيش أصدقاء عندك. ابعت طلب صداقة من قائمة المستخدمين.':usersDirectoryTab==='requests'?'مفيش طلبات صداقة معلقة حاليًا.':'مفيش مستخدمين مطابقين للبحث.')+'</div>';
+  return;
+ }
+ list.forEach(function(p){
+  var name=p.display_name||p.username||'مستخدم جتا';
+  var rel=friendRequestsCache.filter(function(r){return (r.sender_id===user.id&&r.receiver_id===p.id)||(r.sender_id===p.id&&r.receiver_id===user.id);});
+  var accepted=rel.some(function(r){return r.status==='accepted';});
+  var incoming=rel.find(function(r){return r.sender_id===p.id&&r.receiver_id===user.id&&r.status==='pending';});
+  var outgoing=rel.find(function(r){return r.sender_id===user.id&&r.receiver_id===p.id;});
+  var row=document.createElement('div');row.className='feature-row friend-user-row';
+  row.innerHTML=avatarHTML(p.avatar_url,name)+'<div class="feature-row-main"><strong>'+safe(name)+'</strong><small>@'+safe(p.username||'')+'</small></div><div class="friend-user-actions"></div>';
+  var actions=row.querySelector('.friend-user-actions');
+  function addButton(label,cls,fn,disabled){
+   var b=document.createElement('button');b.type='button';b.className=cls||'primary-btn';b.textContent=label;b.disabled=!!disabled;b.addEventListener('click',fn);actions.appendChild(b);return b;
+  }
+  if(accepted){
+   addButton('مراسلة','primary-btn',function(){startDirectChat(p);});
+  }else if(incoming){
+   addButton('قبول','primary-btn',function(){respondToFriendRequest(incoming.id,'accepted');});
+   addButton('رفض','friend-secondary-btn',function(){respondToFriendRequest(incoming.id,'rejected');});
+  }else if(outgoing&&outgoing.status==='pending'){
+   addButton('تم إرسال الطلب','friend-secondary-btn',function(){},true);
+  }else if(outgoing&&outgoing.status==='rejected'){
+   addButton('إعادة طلب الصداقة','primary-btn',function(){sendFriendRequest(p,outgoing);});
+  }else{
+   addButton('طلب صداقة','primary-btn',function(){sendFriendRequest(p,null);});
+  }
+  box.appendChild(row);
+ });
+}
+async function sendFriendRequest(peer,existing){
+ if(!peer||!peer.id||peer.id===user.id)return;
+ var buttonText=existing?'إعادة طلب الصداقة':'طلب صداقة';
+ var result=existing
+  ?await db.from('friend_requests').update({status:'pending',responded_at:null}).eq('id',existing.id).eq('sender_id',user.id)
+  :await db.from('friend_requests').insert({sender_id:user.id,receiver_id:peer.id,status:'pending'});
+ if(result.error){toast('تعذر إرسال طلب الصداقة: '+result.error.message);return;}
+ toast('تم إرسال طلب الصداقة إلى @'+peer.username);
+ await loadUsersDirectory();
+}
+async function respondToFriendRequest(requestId,status){
+ var result=await db.from('friend_requests').update({status:status,responded_at:new Date().toISOString()}).eq('id',requestId).eq('receiver_id',user.id).eq('status','pending');
+ if(result.error){toast('تعذر تحديث الطلب: '+result.error.message);return;}
+ toast(status==='accepted'?'تم قبول طلب الصداقة 🎉':'تم رفض طلب الصداقة');
+ await loadUsersDirectory();
+}
+function setUsersDirectoryTab(tab){
+ usersDirectoryTab=tab;
+ renderUsersDirectory();
+}
+
 function showChats(){
  var workspace=$('chat-view').querySelector('.workspace');
  workspace.classList.remove('hidden');
  $('updates-panel').classList.add('hidden');
  if($('communities-panel'))$('communities-panel').classList.add('hidden');
  if($('calls-panel'))$('calls-panel').classList.add('hidden');
+ if($('users-panel'))$('users-panel').classList.add('hidden');
  workspace.classList.remove('chat-open');document.body.classList.remove('gata-chat-screen');
  if(location.hash==='#chat'){try{history.replaceState({},' ',location.pathname+location.search);}catch(e){}}
 }
@@ -514,6 +611,7 @@ function showUpdates(){
  if(workspace)workspace.classList.add('hidden');
  if($('communities-panel'))$('communities-panel').classList.add('hidden');
  if($('calls-panel'))$('calls-panel').classList.add('hidden');
+ if($('users-panel'))$('users-panel').classList.add('hidden');
  $('updates-panel').classList.remove('hidden');
  closeTopMenu();
 }
@@ -529,7 +627,8 @@ function initEvents(){
  $('back-to-chats').onclick=function(){if(location.hash==='#chat'&&history.state&&history.state.gataChat){history.back();}else{showChats();}};
  window.addEventListener('popstate',function(){showChats();});
  $('chat-search').addEventListener('input',filterConversations);$('toggle-archived-chats').onclick=function(){showArchivedChats=!showArchivedChats;this.textContent=showArchivedChats?'العودة للدردشات':'المؤرشفة';$('conversation-heading-title').textContent=showArchivedChats?'المحادثات المؤرشفة':'المحادثات';$('chat-search').value='';loadConversations();};
- $('refresh-app-btn').onclick=function(){closeTopMenu();refreshApp();};$('new-chat-btn').onclick=function(){closeTopMenu();openModal();};$('contacts-btn').onclick=function(){closeTopMenu();openContacts();};
+ $('refresh-app-btn').onclick=function(){closeTopMenu();refreshApp();};$('new-chat-btn').onclick=function(){closeTopMenu();openModal();};$('contacts-btn').onclick=function(){closeTopMenu();openContacts();};$('users-btn').onclick=function(){showUsers();};
+ $('users-tab-all').onclick=function(){setUsersDirectoryTab('all');};$('users-tab-requests').onclick=function(){setUsersDirectoryTab('requests');};$('users-tab-friends').onclick=function(){setUsersDirectoryTab('friends');};$('users-search').addEventListener('input',renderUsersDirectory);
  var bottomNav=$('bottom-nav');if(bottomNav){bottomNav.addEventListener('click',function(ev){var item=ev.target.closest('[data-nav]');if(!item)return;var key=item.getAttribute('data-nav');if(key==='chats'){showChats();bottomNav.querySelectorAll('.bottom-nav-item').forEach(function(b){b.classList.toggle('active',b===item);if(b===item)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});showChats();return;}if(key==='updates'){showUpdates();bottomNav.querySelectorAll('.bottom-nav-item').forEach(function(b){b.classList.toggle('active',b===item);if(b===item)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});return;}if(key==='communities'||key==='calls'){window.dispatchEvent(new CustomEvent('gata:section',{detail:{key:key}}));return;}toast('القسم ده هيتاح قريبًا');});}$('welcome-new-chat').onclick=openModal;$('close-modal').onclick=function(){$('modal').classList.add('hidden');};$('search-form').addEventListener('submit',searchUsers);
  $('close-image-preview').onclick=closeImagePreview;$('image-preview').addEventListener('click',function(ev){if(ev.target===$('image-preview'))closeImagePreview();});document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){closeStatusViewer();closeTopMenu();closeImagePreview();$('modal').classList.add('hidden');$('settings-panel').classList.add('hidden');$('public-profile-view').classList.add('hidden');}});
  $('logout-btn').onclick=function(){closeTopMenu();logout();};$('open-my-profile').onclick=function(){showPublicProfile(user.id);};$('profile-bio-input').addEventListener('input',function(){$('profile-bio-count').textContent=this.value.length;});$('profile-status-input').addEventListener('input',function(){$('profile-status-count').textContent=this.value.length;});$('close-public-profile').onclick=function(){$('public-profile-view').classList.add('hidden');};$('public-profile-view').onclick=function(ev){if(ev.target===$('public-profile-view'))$('public-profile-view').classList.add('hidden');};$('settings-btn').onclick=function(){$('settings-panel').classList.remove('hidden');$('sound-panel').classList.add('hidden');$('notifications-panel').classList.add('hidden');if(profileData){$('settings-display-name').textContent=profileData.display_name||profileData.username;$('settings-user').textContent='@'+profileData.username;$('profile-display-name').value=profileData.display_name||'';$('profile-bio-input').value=profileData.bio||'';$('profile-bio-count').textContent=($('profile-bio-input').value||'').length;$('profile-status-input').value=String(profileData.status_text||'').indexOf('GATA_STATUS:')===0?'':(profileData.status_text||'');$('profile-status-count').textContent=($('profile-status-input').value||'').length;setAvatar($('settings-avatar'),profileData.avatar_url);}};$('close-settings').onclick=function(){$('settings-panel').classList.add('hidden');};$('settings-sound-row').onclick=function(){$('sound-panel').classList.toggle('hidden');$('privacy-panel').classList.add('hidden');$('profile-editor').classList.add('hidden');$('storage-panel').classList.add('hidden');$('device-panel').classList.add('hidden');$('help-panel').classList.add('hidden');$('about-panel').classList.add('hidden');};$('save-profile-btn').onclick=saveProfileName;$('settings-account-row').onclick=function(){$('profile-editor').classList.toggle('hidden');};$('settings-privacy-row').onclick=function(){$('privacy-panel').classList.toggle('hidden');applyPrivacySettings();};$('settings-storage-row').onclick=function(){$('storage-panel').classList.toggle('hidden');if(!$('storage-panel').classList.contains('hidden'))loadStorageStats();};$('settings-device-row').onclick=function(){$('device-panel').classList.toggle('hidden');if(!$('device-panel').classList.contains('hidden'))loadSessionInfo();};$('signout-other-sessions').onclick=signOutOtherSessions;$('settings-help-row').onclick=function(){$('help-panel').classList.toggle('hidden');$('about-panel').classList.add('hidden');};$('settings-about-row').onclick=function(){$('about-panel').classList.toggle('hidden');$('help-panel').classList.add('hidden');};$('storage-refresh-btn').onclick=loadStorageStats;$('privacy-last-seen').onchange=function(){setPrivacyPref('last-seen',this.checked);if(this.checked&&user)db.from('profiles').update({last_seen:new Date().toISOString()}).eq('id',user.id);toast(this.checked?'تم تفعيل مشاركة آخر ظهور':'تم إيقاف مشاركة آخر ظهور');};$('privacy-read-receipts').onchange=function(){setPrivacyPref('read-receipts',this.checked);toast(this.checked?'تم تفعيل تأكيدات القراءة':'تم إيقاف تأكيدات القراءة');};
