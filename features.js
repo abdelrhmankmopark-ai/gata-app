@@ -6,7 +6,7 @@ var $=function(id){return document.getElementById(id);};
 function say(t){var el=$('toast');if(el){el.textContent=t;el.classList.add('show');setTimeout(function(){el.classList.remove('show');},2800);}}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function page(key){
- ['communities-panel','calls-panel'].forEach(function(id){$(id).classList.add('hidden');});
+ ['communities-panel','calls-panel','users-panel'].forEach(function(id){$(id).classList.add('hidden');});
  var work=document.querySelector('#chat-view .workspace');if(work)work.classList.add('hidden');
  $('updates-panel').classList.add('hidden');
  $(key==='communities'?'communities-panel':'calls-panel').classList.remove('hidden');
@@ -14,7 +14,7 @@ function page(key){
  if(key==='communities')loadCommunities();else loadCallHistory();
 }
 function backToChats(){
- $('communities-panel').classList.add('hidden');$('calls-panel').classList.add('hidden');
+ $('communities-panel').classList.add('hidden');$('calls-panel').classList.add('hidden');if($('users-panel'))$('users-panel').classList.add('hidden');
  var work=document.querySelector('#chat-view .workspace');if(work)work.classList.remove('hidden');
  document.querySelectorAll('[data-nav]').forEach(function(b){var on=b.dataset.nav==='chats';b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
 }
