@@ -729,3 +729,8 @@ body:not(.light) .archived-toggle,body:not(.light) .notification-enable{backgrou
  .friend-directory-tabs{gap:5px}
  .friend-tab{font-size:10px;padding:10px 4px}
 }
+
+/* v64: render the top menu dots consistently across Android fonts */
+.top-menu-toggle{color:var(--text)!important;min-width:44px;min-height:44px;opacity:1!important;visibility:visible!important;-webkit-tap-highlight-color:transparent}
+.top-menu-toggle svg{display:block;width:24px;height:24px;fill:currentColor;stroke:none;overflow:visible}
+.top-menu-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
