@@ -734,3 +734,10 @@ body:not(.light) .archived-toggle,body:not(.light) .notification-enable{backgrou
 .top-menu-toggle{color:var(--text)!important;min-width:44px;min-height:44px;opacity:1!important;visibility:visible!important;-webkit-tap-highlight-color:transparent}
 .top-menu-toggle svg{display:block;width:24px;height:24px;fill:currentColor;stroke:none;overflow:visible}
 .top-menu-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* v65: draw menu dots with CSS, independent of icon fonts and SVG rendering */
+.top-menu-wrap{display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 44px!important;width:44px!important;height:44px!important;position:relative!important;z-index:90!important}
+.top-menu-toggle{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 44px!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;padding:0!important;border:0!important;background:transparent!important;color:#fff!important;opacity:1!important;visibility:visible!important;font-size:0!important;overflow:visible!important}
+.top-menu-toggle svg{display:none!important}
+.top-menu-toggle .menu-dots{display:block!important;position:relative!important;width:6px!important;height:6px!important;min-width:6px!important;min-height:6px!important;border-radius:50%!important;background:#fff!important;box-shadow:0 -9px 0 #fff,0 9px 0 #fff!important;opacity:1!important;visibility:visible!important}
+.top-menu-toggle:active{background:#ffffff20!important}
