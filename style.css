@@ -741,3 +741,13 @@ body:not(.light) .archived-toggle,body:not(.light) .notification-enable{backgrou
 .top-menu-toggle svg{display:none!important}
 .top-menu-toggle .menu-dots{display:block!important;position:relative!important;width:6px!important;height:6px!important;min-width:6px!important;min-height:6px!important;border-radius:50%!important;background:#fff!important;box-shadow:0 -9px 0 #fff,0 9px 0 #fff!important;opacity:1!important;visibility:visible!important}
 .top-menu-toggle:active{background:#ffffff20!important}
+
+/* v66: Google sign-in button */
+.google-signin-wrap{display:grid;gap:13px;margin-top:15px}
+.auth-divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px}
+.auth-divider:before,.auth-divider:after{content:"";height:1px;flex:1;background:var(--line)}
+.google-signin-btn{width:100%;min-height:49px;display:flex;align-items:center;justify-content:center;gap:12px;padding:11px 15px;border:1px solid #cbd5e1;border-radius:13px;background:#fff;color:#202124;font-weight:700;font-size:14px;box-shadow:0 2px 5px #00000012;transition:background .15s,box-shadow .15s}
+.google-signin-btn svg{display:block;width:20px;height:20px;flex:none}
+.google-signin-btn:active{background:#f1f3f4;box-shadow:0 1px 2px #0002}
+.google-signin-btn:disabled{opacity:.65;cursor:wait}
+body.light .google-signin-btn{background:#fff;color:#202124;border-color:#d2d7df}
