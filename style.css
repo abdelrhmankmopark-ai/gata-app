@@ -766,3 +766,7 @@ body.light .google-signin-btn{background:#fff;color:#202124;border-color:#d2d7df
 .top-menu-toggle{display:flex!important;align-items:center!important;justify-content:center!important;width:auto!important;min-width:76px!important;height:42px!important;min-height:42px!important;padding:0 15px!important;border:1px solid #ffffff70!important;border-radius:10px!important;background:#064e46!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font-family:inherit!important;font-size:14px!important;font-weight:800!important;line-height:1.2!important;letter-spacing:0!important;text-indent:0!important;white-space:nowrap!important;opacity:1!important;visibility:visible!important;overflow:visible!important;}
 .top-menu-toggle .menu-dots,.top-menu-toggle svg{display:none!important;}
 .top-menu-toggle:active{background:#033d37!important;}
+
+
+/* GTA v69 — profile page actions */
+.own-profile-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:16px 0 8px}.own-profile-actions .primary-btn,.profile-secondary-btn{min-height:42px;border-radius:12px;padding:10px 12px;font:inherit;font-size:12px;font-weight:800}.profile-secondary-btn{border:1px solid var(--line);background:#ffffff0a;color:var(--text)}.own-profile-actions.hidden{display:none}
