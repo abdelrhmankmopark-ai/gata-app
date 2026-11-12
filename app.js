@@ -86,7 +86,7 @@ function closeImagePreview(){var layer=$('image-preview');layer.classList.add('h
 function dateLabel(s){return new Date(s).toLocaleTimeString(language==='ar'?'ar-EG':'en-US',{hour:'2-digit',minute:'2-digit'});}
 function isPeerOnline(lastSeen){return !!lastSeen&&(Date.now()-new Date(lastSeen).getTime()<65000);}
 function presenceLabel(lastSeen){if(isPeerOnline(lastSeen))return 'متصل الآن';if(!lastSeen)return 'غير متصل';var d=new Date(lastSeen),now=new Date(),sameDay=d.toDateString()===now.toDateString(),yesterday=new Date(now);yesterday.setDate(now.getDate()-1);var sameYesterday=d.toDateString()===yesterday.toDateString(),time=dateLabel(lastSeen);if(sameDay)return 'آخر ظهور اليوم، '+time;if(sameYesterday)return 'آخر ظهور أمس، '+time;return 'آخر ظهور '+d.toLocaleDateString(language==='ar'?'ar-EG':'en-US',{day:'numeric',month:'short'})+'، '+time;}
-function showAuth(tab){$('auth-view').classList.remove('hidden');$('chat-view').classList.add('hidden');$('login-form').classList.toggle('hidden',tab==='signup');$('signup-form').classList.toggle('hidden',tab!=='signup');$('show-login').classList.toggle('active',tab!=='signup');$('show-signup').classList.toggle('active',tab==='signup');note('');}
+function showAuth(tab){$('auth-view').classList.remove('hidden');$('chat-view').classList.add('hidden');$('login-form').classList.toggle('hidden',tab==='signup');$('google-signin-wrap').classList.toggle('hidden',tab==='signup');$('signup-form').classList.toggle('hidden',tab!=='signup');$('show-login').classList.toggle('active',tab!=='signup');$('show-signup').classList.toggle('active',tab==='signup');note('');}
 function applyLanguage(){document.documentElement.lang=language;document.documentElement.dir=language==='ar'?'rtl':'ltr';document.body.dir=document.documentElement.dir;$('message-input').placeholder=tr('write');$('settings-title');$('language-select').value=language;var labels=document.querySelectorAll('[data-i18n]');labels.forEach(function(el){el.textContent=tr(el.dataset.i18n);});}
 async function ensureProfile(){
  var res=await db.from('profiles').select('*').eq('id',user.id).maybeSingle();
@@ -94,8 +94,12 @@ async function ensureProfile(){
  if(res.data){profileData=res.data;return res.data;}
  var meta=user.user_metadata||{};
  var uname=String(meta.username||'').toLowerCase();
+ if(!uname&&user.app_metadata&&user.app_metadata.provider==='google')uname='google_'+String(user.id).replace(/-/g,'').slice(0,10);
  if(!uname){throw new Error('الحساب ده محتاج اسم مستخدم. تواصل مع الدعم.');}
- var ins=await db.from('profiles').insert({id:user.id,username:uname,display_name:meta.display_name||uname}).select().single();
+ var displayName=meta.display_name||meta.full_name||meta.name||(user.email?user.email.split('@')[0]:uname);
+ var profile={id:user.id,username:uname,display_name:displayName};
+ var avatar=meta.avatar_url||meta.picture;if(avatar)profile.avatar_url=avatar;
+ var ins=await db.from('profiles').insert(profile).select().single();
  if(ins.error)throw ins.error;profileData=ins.data;return ins.data;
 }
 async function enterApp(){
@@ -481,6 +485,17 @@ async function startDirectChat(peer){
  toast('المحادثة جاهزة');
 }
 async function login(e){e.preventDefault();note('جاري تسجيل الدخول...');var r=await db.auth.signInWithPassword({email:$('login-email').value.trim(),password:$('login-password').value});if(r.error){note('تعذر تسجيل الدخول: '+r.error.message);return;}user=r.data.user;try{await enterApp();}catch(err){note('تم تسجيل الدخول لكن تعذر تحميل الحساب: '+err.message);}}
+async function loginWithGoogle(){
+ var btn=$('google-signin-btn');if(btn)btn.disabled=true;
+ note('جاري فتح تسجيل الدخول باستخدام Google...');
+ try{
+  var result=await db.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});
+  if(result.error)throw result.error;
+ }catch(err){
+  note('تعذر بدء تسجيل الدخول باستخدام Google: '+(err.message||'حاول مرة أخرى.'));
+  if(btn)btn.disabled=false;
+ }
+}
 async function signup(e){
  e.preventDefault();var username=$('signup-username').value.trim().toLowerCase(),name=$('signup-name').value.trim(),email=$('signup-email').value.trim(),password=$('signup-password').value;
  if(!/^(?=.*\d)[a-z0-9_]{8,24}$/.test(username)){note('اسم المستخدم لازم يكون 8-24 حرف إنجليزي أو رقم أو _ ويحتوي على رقم.');return;}
@@ -637,7 +652,7 @@ function initEvents(){
  $('show-login').onclick=function(){showAuth('login');};$('show-signup').onclick=function(){showAuth('signup');};
  $('top-menu-toggle').onclick=function(ev){ev.stopPropagation();var menu=$('top-menu'),open=menu.classList.toggle('hidden')===false;this.setAttribute('aria-expanded',open?'true':'false');};document.addEventListener('click',function(ev){if(!ev.target.closest('.top-menu-wrap'))closeTopMenu();});
  $('theme-toggle').onclick=toggleTheme;$('theme-toggle-auth').onclick=toggleTheme;
- $('login-form').addEventListener('submit',login);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);$('cancel-message-reply').onclick=clearMessageReply;
+ $('login-form').addEventListener('submit',login);$('google-signin-btn').addEventListener('click',loginWithGoogle);$('signup-form').addEventListener('submit',signup);$('message-form').addEventListener('submit',sendMessage);$('cancel-message-reply').onclick=clearMessageReply;
  $('chat-scroll-toggle').onclick=toggleChatScroll;$('messages').addEventListener('scroll',updateChatScrollButton,{passive:true});$('toggle-message-selection').onclick=function(){setSelectionMode(!selectionMode);};$('delete-selected-messages').onclick=deleteSelectedMessages;$('message-input').addEventListener('input',function(){if(this.value.trim())startTyping();else setTypingState(false);});$('message-sound-select').value=localStorage.getItem('gata-message-sound')||'soft';
  $('copy-my-username').onclick=async function(){if(!profileData||!profileData.username)return;try{await navigator.clipboard.writeText('@'+profileData.username);toast('تم نسخ اسم المستخدم');}catch(e){toast('تعذر النسخ؛ اكتب اسم المستخدم يدويًا');}};$('settings-notifications-row').onclick=function(){$('notifications-panel').classList.toggle('hidden');};$('enable-browser-notifications').onclick=async function(){if(!('Notification'in window)){toast('إشعارات المتصفح غير مدعومة هنا');return;}try{var p=await Notification.requestPermission();if(p==='granted'){localStorage.setItem('gata-browser-notifications','on');this.textContent='الإشعارات مفعّلة ✓';toast('تم تفعيل إشعارات المتصفح');}else{localStorage.setItem('gata-browser-notifications','off');toast('لم يتم منح إذن الإشعارات');}}catch(e){toast('تعذر تفعيل الإشعارات');}};
  if(localStorage.getItem('gata-browser-notifications')==='on'&&'Notification'in window&&Notification.permission==='granted')$('enable-browser-notifications').textContent='الإشعارات مفعّلة ✓';$('message-sound-select').onchange=function(){localStorage.setItem('gata-message-sound',this.value);toast(this.value==='none'?'تم إيقاف صوت الرسائل':'تم تغيير صوت الرسائل');if(this.value!=='none')messageSound();};
