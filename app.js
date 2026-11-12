@@ -711,7 +711,7 @@ if('serviceWorker' in navigator){
   });
   var input=document.getElementById('message-input');
   if(input)input.addEventListener('input',function(){if(reloadPending&&!this.value.trim())reloadForUpdate();});
-  navigator.serviceWorker.register('./sw.js?v=68',{updateViaCache:'none'}).then(function(reg){
+  navigator.serviceWorker.register('./sw.js?v=69',{updateViaCache:'none'}).then(function(reg){
    function checkForUpdate(){if(document.visibilityState==='hidden')return;reg.update().catch(function(){});}
    checkForUpdate();
    window.setInterval(checkForUpdate,30000);
